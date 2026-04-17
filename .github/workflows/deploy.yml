@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
 
 jobs:
   deploy:
@@ -22,7 +28,7 @@ jobs:
 
       - name: Deploy via Rsync
         run: |
-          rsync -rtvz -e "ssh -p 2222" \
+          rsync -rtvz --omit-dir-times -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.gitignore' \
