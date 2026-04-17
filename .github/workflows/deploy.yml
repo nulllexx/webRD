@@ -28,7 +28,7 @@ jobs:
 
       - name: Deploy via Rsync
         run: |
-          rsync -rtvz --omit-dir-times -e "ssh -p 2222" \
+          rsync -rvz --inplace --no-perms --no-owner --no-group -e "ssh -p 2222" \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.gitignore' \
