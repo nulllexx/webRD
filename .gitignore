@@ -2,3 +2,6 @@
 content/
 games/
 storage/
+raindrippy/content
+raindrippy/projects/ # big one... we mustn't push this, could be huge
+raindrippy/sol_content/
