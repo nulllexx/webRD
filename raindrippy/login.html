@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy - Admin Login</title>
+    <link rel="stylesheet" href="/raindrippy/index.css">
+    <link rel="stylesheet" href="/status/login.css">
+    <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <link rel="stylesheet" href="/cookie.css">
+</head>
+<body>
+    <div id="topbar" style="background: rgb(255,255,255);">
+        <img src="/raindrippy/rd.png" alt="RainDrippy Logo" class="logo" onclick="window.location.href='/raindrippy/index'">
+        <a href="profile.html" style="margin-left: 20px;">Profile</a>
+    </div>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <h1 style="text-align: center; margin-top: 200px;">Login to RainDrippy (administrator access)</h1>
+    <form id="loginForm" method="post" style="text-align: center;">
+        <input type="text" name="username" placeholder="Username" required style="margin: 10px; padding: 10px; width: 200px;">
+        <input type="password" name="password" placeholder="Password" required style="margin: 10px; padding: 10px; width: 200px;">
+        <button type="submit" style="padding: 10px 20px;">Login</button>
+        <p style="margin-top: 20px; font-size: large;">Don't have an account? <a href="mailto:raindrippy.contact@protonmail.com">Contact us</a> to request access.</p>
+    </form>
+    <p id="loginStatus" style="text-align:center; color:red; margin-top:10px;"></p>
+    <p style="text-align: center;">Or, alternatively, use the <a href="/login.html">Login Page</a>.</p>
+    <p style="text-align: center; margin-top: 100px;">Didn't mean to get here? <a href="/raindrippy/index.html">Click here</a> to go back.</p>
+    <script src="login.js"></script>
+    <script src="/js/topbar-show.js"></script>
+    <script src="/js/genFP.js"></script>
+</body>
+</html>

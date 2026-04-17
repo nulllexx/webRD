@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Skin uploads</title>
+  <link rel="stylesheet" href="main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    .view-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    #result-view-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 100%;
+      margin-left: 10px;
+      background: #fff;
+      color: #000;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 1em;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      width: 200px;
+      z-index: 1000;
+    }
+
+    #result-view-overlay h2,
+    #result-view-overlay ul {
+      color: #000;
+    }
+
+    #result-view-overlay button#closePopup {
+      background: transparent;
+      color: black;
+      border: none;
+      font-size: 1.5rem;
+      position: absolute;
+      top: 8px; right: 8px;
+      cursor: pointer;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index.html" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads.html" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <h1>Skin Uploads</h1>
+    <p style="margin-top: 2em;">Upload your skin to the BakoSMP server!</p>
+    <p>To get the proper skin file format, please click <a href="https://skinsrestorer.net/generator" style="text-decoration: underline; color: white;"><i>here</i></a>.</p>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="skinFile">Select skin file:</label>
+      <input type="file" id="skinFile" name="file" accept=".customskin,.skinfile,.skin" required style="margin-top: 0.75em"><br>
+      <input type="text" id="username" name="username" placeholder="Enter your username" required style="margin-top: 0.75em"><br>
+      <input type="password" id="password" name="password" placeholder="Enter your password" required style="margin-top: 0.75em"><br>
+      <button type="submit" style="margin-top: 1em">Upload Skin</button>
+    </form>
+    <p id="result-upload" style="display:none; font-weight:bold;"></p>
+    <hr style="margin:2em 0"/>
+
+    <h1>Uploaded skins</h1>
+    <p style="margin-top: 1em;">View all skins uploaded by a user!</p>
+
+    <div class="view-container">
+      <form id="viewSkinsForm">
+        <input type="text" id="viewUsername" name="viewUsername" placeholder="Enter username to view skins" required style="margin-top: 0.75em"/><br>
+        <button type="submit" style="margin-top: 1em">View Skins</button>
+      </form>
+
+      <!-- The popup result panel -->
+      <div id="result-view-overlay">
+        <button id="closePopup">×</button>
+        <h2>Uploaded Skins</h2>
+        <ul id="skinsList"></ul>
+      </div>
+    </div>
+    <hr style="margin:2em 0"/>
+    <h1>Skin deletion</h1>
+    <p style="margin-top: 1em;">Delete your uploaded skins! To get available skins for deletion, use the section above.</p>
+    <form id="deleteForm">
+        <input type="text" id="deleteUsername" name="deleteUsername" placeholder="Enter your username" required style="margin-top: 0.75em"/><br>
+        <input type="password" id="deletePassword" name="deletePassword" placeholder="Enter your password" required style="margin-top: 0.75em"/><br>
+        <input type="text" id="deleteSkinName" name="deleteSkinName" placeholder="Enter skin name to delete" required style="margin-top: 0.75em"/><br>
+        <button type="submit" style="margin-top: 1em; background-color: darkred;">Delete Skin</button>
+    </form>
+    <p id="result-delete" style="display:none; font-weight:bold;"></p>
+    <script>
+      // Handle deletion
+      document.getElementById('deleteForm').addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const resultEl = document.getElementById('result-delete');
+  resultEl.style.display = 'none';
+
+  // Collect inputs
+  const username = document.getElementById('deleteUsername').value;
+  const password = document.getElementById('deletePassword').value;
+  const skinName = document.getElementById('deleteSkinName').value;
+
+  // Prepare JSON body
+  const payload = {
+    username: username,
+    password: password,
+    filename: skinName
+  };
+
+  try {
+    const res = await fetch('https://bakosmp.go.ro/api/delskin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'  // Important!
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.status === 200) {
+      resultEl.style.color = 'green';
+      resultEl.textContent = 'Deleted successfully';
+    } else {
+      // Optionally try to parse error message from response
+      let errorMsg = 'Deletion failed';
+      try {
+        const errData = await res.json();
+        if (errData.message) errorMsg = errData.message;
+      } catch {}
+
+      resultEl.style.color = 'red';
+      resultEl.textContent = errorMsg;
+    }
+  } catch (error) {
+    resultEl.style.color = 'red';
+    resultEl.textContent = 'Deletion failed';
+    console.error("Deletion error:", error);
+  } finally {
+    resultEl.style.display = 'block';
+  }
+});
+
+    </script>
+    <script>
+      // Handle upload
+      document.getElementById('uploadForm').addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const resultEl = document.getElementById('result-upload');
+        resultEl.style.display = 'none';
+
+        const formData = new FormData(e.target);
+
+        try {
+          const res = await fetch('https://bakosmp.go.ro/api/uploadskinfile', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (res.status === 200) {
+            resultEl.style.color = 'green';
+            resultEl.textContent = 'Uploaded successfully';
+          } else {
+            resultEl.style.color = 'red';
+            resultEl.textContent = 'Upload failed';
+          }
+        } catch (error) {
+          resultEl.style.color = 'red';
+          resultEl.textContent = 'Upload failed';
+        } finally {
+          resultEl.style.display = 'block';
+        }
+      });
+
+      // Handle skin view
+      document.getElementById('viewSkinsForm').addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const username = document.getElementById('viewUsername').value;
+        const popup = document.getElementById('result-view-overlay');
+        const list = document.getElementById('skinsList');
+
+        // Clear list
+        list.innerHTML = '';
+        popup.style.display = 'none';
+
+        try {
+          const res = await fetch(`https://bakosmp.go.ro/api/userskins/${encodeURIComponent(username)}`);
+
+          if (res.status === 200) {
+            const data = await res.json();
+            const skins = data.files;
+            if (skins.length === 0) {
+              list.innerHTML = '<li>No skins uploaded</li>';
+            } else {
+              skins.forEach(skin => {
+                const li = document.createElement('li');
+                li.textContent = `• ${skin}`;
+                list.appendChild(li);
+              });
+            }
+
+            popup.style.display = 'block';
+          } else {
+            list.innerHTML = '<li>No skins found or user does not exist</li>';
+            popup.style.display = 'block';
+          }
+        } catch (error) {
+          list.innerHTML = '<li>Error fetching skins</li>';
+          console.error("Caught exception:", error);
+          popup.style.display = 'block';
+        }
+      });
+
+      // Close popup
+      document.getElementById('closePopup').addEventListener('click', () => {
+        document.getElementById('result-view-overlay').style.display = 'none';
+      });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>

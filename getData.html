@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Get Data</title>
+  <link rel="stylesheet" href="/main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    .section {
+      padding-top: 2em;
+      margin-top: -2em; /* Offset for fixed header if needed */
+    }
+    
+    .section:target {
+      animation: highlight 2s ease-in-out;
+    }
+    
+    @keyframes highlight {
+      0% { background-color: rgba(255, 255, 255, 0.1); }
+      50% { background-color: rgba(255, 255, 255, 0.2); }
+      100% { background-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <section id="account-data" class="section">
+        <h1>Account Data</h1>
+        <button id="downloadAccountData">Download Account Info (JSON)</button>
+        <p id="accountDataMessage" style="margin-top: 1em;"></p>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://bakosmp.go.ro/api/logged-in', {
+                method: 'GET',
+                credentials: 'include'
+            }).then(async response => {
+                const data = await response.json();
+                if (response.status === 200 && data.loggedIn === false) {
+                    window.location.href = '/login.html';
+                }
+            })
+        });
+        document.getElementById('downloadAccountData').addEventListener('click', function() {
+        fetch('https://bakosmp.go.ro/api/account-data', {
+        method: 'GET',
+        credentials: 'include'
+        })
+        .then(async response => {
+        const data = await response.json();
+        const msg = document.getElementById('accountDataMessage');
+
+        if (response.status === 200) {
+            // Create a Blob and download
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'account_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            msg.textContent = 'Account data downloaded!';
+            msg.style.color = 'green';
+        } else {
+            msg.textContent = data.error || 'Failed to download account data.';
+            msg.style.color = 'red';
+        }
+        })
+        .catch(err => {
+        console.error(err);
+        const msg = document.getElementById('accountDataMessage');
+        msg.textContent = 'Error downloading account data.';
+        msg.style.color = 'red';
+        });
+    });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>

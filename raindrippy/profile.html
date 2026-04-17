@@ -1,0 +1,73 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy - Your Profile</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <link rel="stylesheet" href="/cookie.css">
+    <style>
+        h3 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #2c3e50;
+        }
+        #profile-info {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            }
+            button:hover {
+            background-color: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+    <div id="topbar">
+        <img src="rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='index'">
+        <span class="tpbar-txt" style="margin-left: 20px;">RainDrippy</span>
+        <a class="tpbar-txt" href="profile" style="margin-left: 2em;">Profile</a>
+    </div>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <div id="content">
+        <h3 id="welcome-text" style="text-align: center;"></h3>
+        <div id="profile-info" style="display: none;">
+            <h2 style="text-align: center;">Profile Information</h2>
+            <p style="text-align: center;">Here you can view information about your account, and also generate/view your API key.</p>
+            <div id="api-key-section" style="text-align: center;">
+                <h3>Your API Key</h3>
+                <p>Press the button below to fetch your API key.</p>
+                <button id="generate-api-key" class="btn">Fetch API Key</button><br><br>
+                <code id="key-output" style="margin-top: 4em;"></code><br><br>
+                <button id="copy-api-key" class="btn" style="display: none; margin-top: 10px;">Copy API Key</button><button id="hide-key" style="display: none; margin-left: 20px;">Hide API Key</button><br><br>
+                <p id="copied" style="display: none;">Copied!</p><br>
+                <hr>
+                <h3>Usage</h3>
+                <p>Use the API key to access our <a href="/raindrippy/api_docs">Public API</a>. Keep it secure and do not share it publicly.</p>
+                <p>Below is your usage information:</p>
+                <button id="fetch-usage">Get usage</button>
+                <div id="usage-info" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/topbar-show.js"></script>
+    <script src ="profile.js"></script>
+    <script src="/js/genFP.js"></script>
+</body>
+</html>

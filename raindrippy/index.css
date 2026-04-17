@@ -1,0 +1,256 @@
+/* Basic styling, index.css */
+  #topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #2c3e50;
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    
+    /* Start hidden and above viewport */
+    opacity: 0;
+    transform: translateY(-50px);
+    
+    /* Transition for smooth animation */
+    transition: opacity 0.95s ease, transform 0.95s ease;
+    z-index: 1000;
+    height: 80px;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  img {
+    transition: transform 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+  }
+  img:hover {
+    transform: scale(1.1);
+    filter: brightness(75%);
+  }
+  #content {
+    padding-top: 100px; /* Space for the topbar */
+  }
+  /* Class to show the topbar */
+  #topbar.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .logo {
+    width: 75px;
+    height: 75px;
+    display: inline-block;
+    border-radius: 8px;
+    background-size: contain;
+    vertical-align: middle
+  }
+  .tpbar-txt {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+    font-weight: bold;
+    color: white;
+    font-size: 24px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  h3, h4, h2, li, h1 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2c3e50;
+  }
+  
+  p {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #34495e;
+    line-height: 1.6;
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+  strong {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  a {
+    text-decoration: underline;
+    color: #2980b9;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: color 0.3s ease;
+  }
+  a:hover {
+    color: #1abc9c;
+  }
+  #toc {
+    margin: 20px auto;
+    width: 600px;
+    text-align: center;
+    padding: 30px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: rgba(19, 19, 19, 0.11);
+    border-radius: 16px;
+  }
+    #toc ul {
+        display: inline-block;
+    }
+  .code-viewer {
+    background-color: #2d2d2d; /* dark gray */
+    border-radius: 8px;
+    padding: 15px;
+    color: #eee;
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: 'Fira Code', monospace, monospace;
+    position: relative;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border-color: rgba(19, 19, 19, 0.11);
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border-color: rgba(19, 19, 19, 0.11);
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    font-family: 'Fira Code', monospace, monospace;
+    resize: vertical;
+    min-height: 100px;
+  }
+  textarea:focus {
+    border-color: #2980b9;
+    outline: none;
+  }
+  select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    border-color: rgba(19, 19, 19, 0.11);
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+    background-color: white;
+  }
+  select:hover {
+    border-color: #aaa;
+  }
+  select:focus {
+    border-color: #2980b9;
+    outline: none;
+  }
+  input[type="text"]:focus {
+    border-color: #2980b9;
+    outline: none;
+  }
+  #userTable table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: sans-serif;
+    font-size: 0.95rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  #userTable thead {
+    background: #2980b9;
+    color: #282828;
+  }
+  #userTable th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  #userTable td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  #userTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  #userTable tbody tr:hover {
+    background-color: #eef6fc;
+    transition: background-color 0.2s ease;
+  }
+  #userTable input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+  }
+  #userTable button {
+    margin: 0 4px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+  }
+  #userTable .unbanBtn {
+    background: #27ae60;
+    color: #fff;
+  }
+
+  #userTable .unbanBtn:hover {
+    background: #1e8a4d;
+  }
+
+  #userTable .deleteBtn {
+    background: #e74c3c;
+    color: #fff;
+  }
+
+  #userTable .deleteBtn:hover {
+    background: #c0392b;
+  }
+  button {
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+      background-color: #1abc9c;
+  } 
+  .code-viewer pre {
+    margin: 0;
+    overflow-x: auto;
+    max-height: 400px; /* max height when expanded */
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  #code-block {
+    background-color: #2d2d2d; /* dark gray */
+  }
+  .code-viewer.minimized pre {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .toggle-btn {
+    position: absolute;
+    top: 2.5px;
+    left: 15px;
+    background: transparent;
+    border: none;
+    color: #eee;
+    cursor: pointer;
+    font-size: 20px;
+    user-select: none;
+  }
+
+  .toggle-btn:hover {
+    color: #aaa;
+  }

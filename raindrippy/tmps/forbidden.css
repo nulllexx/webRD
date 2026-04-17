@@ -1,0 +1,39 @@
+.ban-card {
+      max-width: 600px;
+      margin: 4em auto;
+      padding: 2em;
+      border-radius: 12px;
+      background: #1a1a1a;
+      color: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.ban-header {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+}
+.ban-info {
+    margin: 0.5em 0;
+}
+.offending {
+    background: #2a2a2a;
+    padding: 1em;
+    border-radius: 8px;
+    margin-top: 1em;
+}
+.warning {
+    color: #ff6666;
+    margin-top: 1em;
+    font-weight: bold;
+}
+button {
+    background-color: #2980b9;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+button:hover {
+    background-color: #1abc9c;
+}

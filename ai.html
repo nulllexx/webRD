@@ -1,0 +1,39 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BakoSMP - AI Experiments</title>
+    <script src="restrictDev.js"></script>
+    <link rel="stylesheet" href="main.css" type="text/css">
+    <link rel="stylesheet" href="/cookie.css">
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    <div class="topbar">
+    <img src="main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <h1 style="text-align: center;">AI Experiments</h1>
+    <h2>Support chatbot</h2>
+    <form id="support-bot">
+        <input type="text" id="user-input" placeholder="Ask me anything..." required>
+        <button class="aibtn" type="submit">Ask</button>
+    </form>
+    <div id="support-response-div" style="width: 75%; height: 20%; border-radius: 16px; background-color: rgba(57, 57, 57, 0.717); padding: 1em; margin-top: 1em; overflow-y: auto; border-color: gray; margin: auto;">
+        <p style="word-wrap: break-word;" id="support-text">Ask your question to get a response.</p>
+    </div>
+  </div>
+  <script src="/js/genFP.js"></script>
+</body>
+</html>

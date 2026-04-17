@@ -1,0 +1,135 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+}
+
+.logo {
+    transition: transform 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+}
+.logo:hover {
+    transform: scale(1.1);
+    filter: brightness(75%);
+}
+h3, h2, h1, h5 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* overview */
+#overview-status {
+    display: flex;
+    justify-content: center;
+    margin: auto auto 0 auto;
+    width: 50%;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+/* components list (full-status) */
+#full-status {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    margin: 100px auto 0 auto;
+    width: 50%;
+    border: rgba(0, 0, 0, 0.15) 1px solid;
+    border-radius: 10px;
+    padding: 8px;
+}
+.component-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: white;
+    min-width: 120px;
+    text-align: center;
+}
+
+/* current incident */
+#current-incident {
+    width: 50%;
+    margin: 12px auto 0 auto;
+    box-sizing: border-box;
+}
+
+/* incident history */
+#incident-history {
+    width: 50%;
+    margin: 12px auto 40px auto;
+    box-sizing: border-box;
+}
+
+/* FIXED: Incident card styles */
+.incident-card {
+    margin-bottom: 24px;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+.incident-topbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    box-sizing: border-box;
+}
+
+.incident-topbar-title {
+    color: white;
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.incident-topbar-date {
+    color: white;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+/* FIXED: Incident update styles */
+.incident-update {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.incident-update:last-child {
+    border-bottom: none;
+}
+
+.incident-update-time {
+    margin: 0 0 8px 10px; /* Added 10px left margin */
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.incident-update-text {
+    margin: 0 0 0 10px; /* Added 10px left margin */
+    line-height: 1.4;
+    color: #555;
+}
+/* Topbar styles */
+#topbar {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}

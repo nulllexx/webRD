@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy Docs - API Documentation</title>
+    <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <link rel="stylesheet" href="/raindrippy/docs/styles.css">
+    <link rel="stylesheet" href="/cookie.css">
+</head>
+<body>
+    <header class="header" id="header">
+        <div class="header-content">
+            <img src="/raindrippy/rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='index.html'">
+            <a href="#" class="brand">RainDrippy Docs</a>
+            <nav class="nav-links">
+                <a href="/raindrippy/profile.html">Profile</a>
+                <a href="#getting-started">Docs</a>
+            </nav>
+        </div>
+    </header>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <main class="main-content">
+        <section class="hero">
+            <h1>RainDrippy API Documentation</h1>
+            <p class="version">Version 1.0</p>
+        </section>
+
+        <div class="quick-nav">
+            <h3>Quick Navigation</h3>
+            <div class="quick-nav-links">
+                <a href="#getting-started">Getting Started</a>
+                <a href="#calling">Making Calls</a>
+                <a href="#endpoints">Endpoints</a>
+                <a href="#limits">Rate Limits</a>
+            </div>
+        </div>
+
+        <section id="getting-started" class="section">
+            <h2 class="section-title">Getting Started</h2>
+            <div class="section-content">
+                <p>Welcome to the RainDrippy API documentation. This guide will help you understand how to interact with our growing Public API to access and use our services in your own applications.</p>
+                
+                <div class="alert info">
+                    <strong>API Structure:</strong> Our API is split into Public (documented, accessible) and Private (internal use only) components.
+                </div>
+
+                <h3>API Components</h3>
+                <ol>
+                    <li><strong>Public API</strong>: Documented and publicly accessible. Handles reading & writing data to/from certain services that we make publicly available.</li>
+                    <li><strong>Private API</strong>: Internal use only, undocumented, and may change without notice. Handles vital functions such as database queries and authentication.</li>
+                </ol>
+
+                <h3>Getting Your API Key</h3>
+                <p>To get started with the Public API, you'll need an API key:</p>
+                <ol>
+                    <li><a href="/auth.html">Create an account</a></li>
+                    <li>Generate an API key from your <a href="/raindrippy/profile.html">profile page</a></li>
+                    <li>Include the key in all your requests</li>
+                </ol>
+
+                <div class="alert warning">
+                    <strong>Important:</strong> Requests without an API key will return <code class="inline-code">HTTP 401 Unauthorized</code>.
+                </div>
+            </div>
+        </section>
+
+        <section id="calling" class="section">
+            <h2 class="section-title">Making API Calls</h2>
+            <div class="section-content">
+                <p>All requests to the RainDrippy Public API use the following base URL:</p>
+                <div class="code-block">
+                    <pre id="api-base-url"></pre>
+                </div>
+
+                <h3>Authentication</h3>
+                <p>Include your raw API key in the <code class="inline-code">X-API-KEY</code> header for all requests:</p>
+                
+                <div class="code-block">
+                    <pre id="curl-example"></pre>
+                </div>
+
+                <h3>Response Format</h3>
+                <p>All API responses are in JSON format with appropriate HTTP status codes.</p>
+            </div>
+        </section>
+
+        <section id="endpoints" class="section">
+            <h2 class="section-title">Available Endpoints</h2>
+            <div class="section-content">
+                
+                <div class="subsection">
+                    <h3>Player Count</h3>
+                    <dl class="endpoint-info">
+                        <dt>Endpoint:</dt>
+                        <dd><code class="inline-code">/playercount</code></dd>
+                        <dt>Method:</dt>
+                        <dd><span class="method get">GET</span></dd>
+                        <dt>Description:</dt>
+                        <dd>Returns the current number of active players on the Minecraft server</dd>
+                    </dl>
+                    <h4>Example Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "playerCount": 10
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Hash Generator</h3>
+                    <dl class="endpoint-info">
+                        <dt>Endpoint:</dt>
+                        <dd><code class="inline-code">/hash</code></dd>
+                        <dt>Method:</dt>
+                        <dd><span class="method post">POST</span></dd>
+                        <dt>Description:</dt>
+                        <dd>Hashes a string using SHA-256 + salt (same method used for password storage)</dd>
+                    </dl>
+                    <h4>Request Body:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "password": "string_to_hash"
+}</code></pre>
+                    </div>
+                    <h4>Example Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "output": "hashed_string_here"
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>File Management</h3>
+                    <dl class="endpoint-info">
+                        <dt>Endpoint:</dt>
+                        <dd><code class="inline-code">/files</code></dd>
+                        <dt>Methods:</dt>
+                        <dd><span class="method get">GET</span> <span class="method post">POST</span></dd>
+                        <dt>Description:</dt>
+                        <dd>List files (GET) or upload a file (POST) to the server</dd>
+                    </dl>
+                    
+                    <h4>GET Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "files": [
+        "1fb4a8dde895b53d8fc62660d3cbe22f"
+    ]
+}</code></pre>
+                    </div>
+
+                    <h4>POST Request (multipart/form-data):</h4>
+                    <div class="code-block">
+<pre>Key: 'file' (File)
+Content-Type: multipart/form-data</pre>
+                    </div>
+
+                    <h4>POST Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "message": "File uploaded successfully",
+    "file": {
+        "fieldname": "file",
+        "originalname": "main.png",
+        "encoding": "7bit",
+        "mimetype": "image/png",
+        "destination": "C:/server/media",
+        "filename": "1fb4a8dde895b53d8fc62660d3cbe22f",
+        "path": "C:/server/media/1fb4a8dde895b53d8fc62660d3cbe22f",
+        "size": 4581
+    }
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Server Status</h3>
+                    <dl class="endpoint-info">
+                        <dt>Endpoint:</dt>
+                        <dd><code class="inline-code">/serverrunning</code></dd>
+                        <dt>Method:</dt>
+                        <dd><span class="method get">GET</span></dd>
+                        <dt>Description:</dt>
+                        <dd>Check if the Minecraft server is currently running</dd>
+                    </dl>
+                    <h4>Example Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "running": true
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Start Server</h3>
+                    <dl class="endpoint-info">
+                        <dt>Endpoint:</dt>
+                        <dd><code class="inline-code">/startserver</code></dd>
+                        <dt>Method:</dt>
+                        <dd><span class="method post">POST</span></dd>
+                        <dt>Description:</dt>
+                        <dd>Start the Minecraft server (requires authentication)</dd>
+                        <dt>Authentication:</dt>
+                        <dd>Requires <code class="inline-code">userToken</code> cookie from login endpoint</dd>
+                    </dl>
+                    <h4>Example Response:</h4>
+                    <div class="code-block">
+<pre><code class="language-json">{
+    "message": "Server started successfully"
+}</code></pre>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="limits" class="section">
+            <h2 class="section-title">Rate Limits & Policies</h2>
+            <div class="section-content">
+                <div class="alert warning">
+                    <strong>Current Rate Limit:</strong> 100 requests per hour per API key
+                </div>
+
+                <p>To ensure fair usage and prevent abuse, the RainDrippy Public API enforces rate limits on requests. If you exceed the limit, access will be temporarily restricted until your limit resets.</p>
+
+                <h3>Best Practices</h3>
+                <ul>
+                    <li>Implement appropriate error handling for rate limiting responses</li>
+                    <li>Cache responses when possible to reduce API calls</li>
+                    <li>Monitor your usage from your <a href="/raindrippy/profile.html">profile page</a></li>
+                </ul>
+
+                <h3>Policy Updates</h3>
+                <p>We reserve the right to modify these limits and policies at any time. Continued abuse of the API may result in the suspension or revocation of your API key.</p>
+
+                <p>For questions or concerns regarding the API, please <a href="mailto:raindrippy.contact@protonmail.com">contact our support team</a>.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Initialize dynamic content
+        document.addEventListener("DOMContentLoaded", function() {
+            const baseUrl = window.location.origin + "/api/v1/";
+            
+            // Set API base URL
+            const apiBaseElement = document.getElementById("api-base-url");
+            if (apiBaseElement) {
+                apiBaseElement.textContent = baseUrl;
+            }
+            
+            // Set curl example
+            const curlExample = document.getElementById("curl-example");
+            if (curlExample) {
+                curlExample.textContent = `curl -X GET "${baseUrl}playercount" \\
+  -H "X-API-KEY: YOUR_API_KEY_HERE"`;
+            }
+        });
+
+        // Header scroll behavior
+        let lastScrollY = window.scrollY;
+        const header = document.getElementById('header');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            lastScrollY = window.scrollY;
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+    <script src="/js/genFP.js"></script>
+</body>
+</html>

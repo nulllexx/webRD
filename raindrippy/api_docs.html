@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy - Available API documentations</title>
+    <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <link rel="stylesheet" href="/raindrippy/index.css">
+    <link rel="stylesheet" href="/cookie.css">
+</head>
+<body>
+    <div id="topbar">
+        <img src="rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='index'">
+        <span class="tpbar-txt" style="margin-left: 20px;">RainDrippy</span>
+        <a class="tpbar-txt" href="profile " style="margin-left: 2em;">Profile</a>
+    </div>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <div id="content">
+        <h2 style="text-align: center;">Available API Documentations</h2>
+        <p style="text-align: center;">Below are the available API documentations for RainDrippy. Click on the links to explore the API details.</p>
+        <ul style="max-width: 600px; margin: 0 auto; padding: 0; list-style-type: none;" id="api-list">
+            <!-- API documentation links will be populated here by js -->
+        </ul>
+    <script src="/js/topbar-show.js"></script>
+    <script>
+        const apiList = {
+            v1: "/raindrippy/docs/v1/index"
+            // add more here in the future
+        };
+        const apilistul = document.getElementById('api-list');
+        document.addEventListener('DOMContentLoaded', function() {
+            for (const [version, url] of Object.entries(apiList)) {
+                apilistul.innerHTML += `<li style="margin: 10px 0; padding: 10px; background-color: #f9f9f9; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <a href="${url}" style="text-decoration: none; color: #2980b9; font-size: 1.2em;">RainDrippy API ${version} Documentation</a>
+                <p style="margin-top: 5px; color: #7f8c8d;">Comprehensive guide to using the RainDrippy API version ${version}.</p>
+            </li>`;
+            }
+        });
+    </script>
+    <script src="/js/genFP.js"></script>
+</body>
+</html>

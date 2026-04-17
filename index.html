@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Home</title>
+  <link rel="stylesheet" href="main.css"/>
+  <style>
+    /* Enhanced Background Animation */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 50% 25%; }
+            50% { background-position: 100% 50%; }
+            75% { background-position: 50% 75%; }
+            100% { background-position: 0% 50%; }
+        }
+        .logo {
+            height: 40px;
+            margin-right: 15px;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleGlow 4s infinite;
+        }
+
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 5px rgba(243, 156, 18, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(243, 156, 18, 0.8); }
+            100% { text-shadow: 0 0 5px rgba(243, 156, 18, 0.5); }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Content Section with Enhancements */
+        .content {
+            margin-top: 100px;
+            padding: 40px;
+            text-align: left;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(30px);
+            opacity: 0;
+            animation: slideUp 1s ease-out forwards 0.3s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-size: 28px;
+            color: #f39c12;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: #f39c12;
+            animation: lineExpand 1.5s ease-out forwards 1s;
+        }
+
+        @keyframes lineExpand {
+            to { width: 100%; }
+        }
+
+        h3 {
+            font-size: 22px;
+            color: #f39c12;
+            margin-top: 30px;
+            transform: translateX(-20px);
+            opacity: 0;
+            animation: slideRight 0.8s ease-out forwards 1.2s;
+        }
+
+        @keyframes slideRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        p {
+            font-size: 18px;
+            margin: 15px 0;
+            opacity: 0;
+            animation: fadeInText 0.8s ease-out forwards;
+            animation-delay: calc(1.3s + var(--delay, 0s));
+        }
+
+        p:nth-child(2) { --delay: 0.1s; }
+        p:nth-child(3) { --delay: 0.2s; }
+        p:nth-child(4) { --delay: 0.3s; }
+        p:nth-child(5) { --delay: 0.4s; }
+
+        @keyframes fadeInText {
+            to { opacity: 1; }
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            font-size: 18px;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: listItem 0.5s ease-out forwards;
+            animation-delay: calc(1.5s + var(--item-delay, 0s));
+        }
+
+        ul li:nth-child(1) { --item-delay: 0s; }
+        ul li:nth-child(2) { --item-delay: 0.15s; }
+        ul li:nth-child(3) { --item-delay: 0.3s; }
+        ul li:nth-child(4) { --item-delay: 0.45s; }
+        ul li:nth-child(5) { --item-delay: 0.6s; }
+        ul li:nth-child(6) { --item-delay: 0.75s; }
+        ul li:nth-child(7) { --item-delay: 0.9s; }
+
+        @keyframes listItem {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        ul li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            color: #f39c12;
+            animation: checkmark 0.3s ease-out forwards;
+            transform: scale(0);
+            animation-delay: calc(2s + var(--item-delay, 0s));
+        }
+
+        @keyframes checkmark {
+            50% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 25px;
+            margin-top: 30px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: #000;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: buttonAppear 0.8s ease-out forwards 2.5s;
+        }
+
+        @keyframes buttonAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6);
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .email {
+            color: #3498db;
+            position: relative;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .email::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+
+        .email:hover {
+            color: #2980b9;
+        }
+
+        .email:hover::after {
+            width: 100%;
+        }
+
+        .discord-link {
+            color: #7289da;
+            text-decoration: none;
+            font-weight: bold;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .discord-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #7289da;
+            transition: width 0.3s ease;
+        }
+
+        .discord-link:hover {
+            color: #5e73bc;
+        }
+
+        .discord-link:hover::after {
+            width: 100%;
+        }
+
+        /* Particles Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 50px;
+            border: 2px solid #f39c12;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            opacity: 0;
+            animation: scrollAppear 1s forwards 3s;
+        }
+
+        @keyframes scrollAppear {
+            to { opacity: 0.7; }
+        }
+
+        .scroll-indicator::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #f39c12;
+            border-radius: 50%;
+            margin-top: 8px;
+            animation: scrollAnim 2s infinite;
+        }
+
+        @keyframes scrollAnim {
+            0% { transform: translateY(0); opacity: 1; }
+            80% { transform: translateY(20px); opacity: 0; }
+            81% { transform: translateY(0); opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+                margin-top: 80px;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+        }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index.html" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads.html" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="auth.html" style="margin-left: 2em;">Authentification</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div class="content">
+        <h2>BakoSMP - A Minecraft SMP for Everyone</h2>
+        <p><strong>SEASON 4 IS HERE!</strong></p>
+        <p>Have you ever wanted to play Minecraft multiplayer but struggled to find a server that truly fits your needs? Maybe you tried big servers like Hypixel and got bored, or you searched for SMPs and only found inactive or uninspired options?</p>
+        <p>Look no further - this is the server for you!</p>
+        <p>BakoSMP is a Minecraft survival multiplayer server that aims to provide a fun and engaging experience for all players. We offer a variety of features and activities to keep you entertained, including:</p>
+        <ul>
+            <li>Our unique Seasons Update ensures fresh gameplay every 2-3 months with a brand-new world. Each season introduces something different—be it new mods, plugins, or even a pure vanilla experience, keeping things exciting for all players.</li>
+        </ul>
+
+        <h3>Why join BakoSMP?</h3>
+        <ul>
+            <li>A welcoming and active community</li>
+            <li>Custom plugins and features</li>
+            <li>Events and competitions</li>
+            <li>Active and dedicated staff</li>
+            <li>Regular updates and improvements</li>
+            <li>Compatibility with cracked Minecraft (Java Edition Only)</li>
+            <li>And much more!</li>
+        </ul>
+
+        <p>Join our <a href="https://discord.gg/8b3zCqf3" target="_blank" class="discord-link">Discord server</a> to get started! It's required to access the Minecraft server, and it's where we keep everyone updated on news and events.</p>
+
+        <p><strong>Convinced?</strong> Join BakoSMP and experience Minecraft Multiplayer the way it's meant to be played!</p>
+
+        <p>For any questions, feel free to email us: <a href="mailto:thisisformehello@gmail.com" class="email">thisisformehello@gmail.com</a></p>
+        <p>BakoSMP is hosted locally by BakoPlayz on <strong>SERVER@bakosmp.go.ro</strong></p>
+
+        <a href="https://discord.gg/8b3zCqf3" class="cta-button" target="_blank">Join Our Discord</a>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator"></div>
+
+    <!-- Particle.js for background particles -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize particles
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof particlesJS !== 'undefined') {
+                particlesJS("particles-js", {
+                    "particles": {
+                        "number": {
+                            "value": 80,
+                            "density": {
+                                "enable": true,
+                                "value_area": 800
+                            }
+                        },
+                        "color": {
+                            "value": "#f39c12"
+                        },
+                        "shape": {
+                            "type": "circle",
+                        },
+                        "opacity": {
+                            "value": 0.5,
+                            "random": true
+                        },
+                        "size": {
+                            "value": 3,
+                            "random": true
+                        },
+                        "line_linked": {
+                            "enable": true,
+                            "distance": 150,
+                            "color": "#ffffff",
+                            "opacity": 0.2,
+                            "width": 1
+                        },
+                        "move": {
+                            "enable": true,
+                            "speed": 2,
+                            "direction": "none",
+                            "random": true,
+                            "straight": false,
+                            "out_mode": "out",
+                            "bounce": false
+                        }
+                    },
+                    "interactivity": {
+                        "detect_on": "canvas",
+                        "events": {
+                            "onhover": {
+                                "enable": true,
+                                "mode": "grab"
+                            },
+                            "onclick": {
+                                "enable": true,
+                                "mode": "push"
+                            },
+                            "resize": true
+                        },
+                        "modes": {
+                            "grab": {
+                                "distance": 140,
+                                "line_linked": {
+                                    "opacity": 0.6
+                                }
+                            },
+                            "push": {
+                                "particles_nb": 4
+                            }
+                        }
+                    },
+                    "retina_detect": true
+                });
+            }
+            
+            // Hide scroll indicator when scrolled
+            window.addEventListener('scroll', function() {
+                const scrollIndicator = document.querySelector('.scroll-indicator');
+                if (window.scrollY > 100 && scrollIndicator) {
+                    scrollIndicator.style.opacity = '0';
+                    scrollIndicator.style.transition = 'opacity 0.5s';
+                }
+            });
+            
+            // Add reveal animations on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'none';
+                        entry.target.offsetHeight; // Trigger reflow
+                        entry.target.style.animation = null;
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            document.querySelectorAll('h3, p, ul li').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

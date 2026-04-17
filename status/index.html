@@ -1,0 +1,35 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy Status</title>
+    <link rel="stylesheet" href="/raindrippy/index.css">
+    <link rel="stylesheet" href="/status/status.css">
+    <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <link rel="stylesheet" href="/cookie.css">
+</head>
+<body>
+    <noscript>Please enable JavaScript to properly use this webpage.</noscript>
+    <div id="topbar" style="background: rgb(255,255,255);">
+        <img src="/raindrippy/rd.png" alt="RainDrippy Logo" class="logo" onclick="window.location.href='/raindrippy/index'">
+        <a href="dashboard" style="margin-left: 20px;">Dashboard</a>
+    </div>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <h1 style="text-align: center; margin-top: 200px;">RainDrippy Status</h1>
+    <div id="overview-status">
+        <h3 style="color: white;" id="overview-title">Unable to fetch status</h3>
+    </div>
+    <div id="full-status"><!-- Handled by index.js --></div>
+    <div id="current-incident"></div>
+    <h2 style="color: rgba(26, 26, 26, 0.384); margin-top: 100px; margin-left: 25%; font-weight: normal;">Incident history</h2>
+    <div id="incident-history"></div>
+    <script src="/js/topbar-show.js"></script>
+    <script src="/status/index.js"></script>
+    <script src="/js/genFP.js"></script>
+</body>
+</html>

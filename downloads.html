@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - World Downloads</title>
+  <link rel="stylesheet" href="main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    .season-entry button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      border-radius: 4px;
+    }
+
+    .season-entry button:hover {
+      background-color: #45a049;
+    }
+    .season-entry {
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        background-color: rgb(36, 36, 36);
+        border-radius: 16px;
+        border: 2px solid rgb(58, 58, 58);
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index.html" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads.html" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <h1>World Downloads</h1>
+    <p>Download the latest worlds for BakoSMP below. These are all the archives that we have available.</p>
+    <div id="seasons-container"></div>
+
+    <script>
+        const endpoint = '/api/fetch-worlds';
+        const container = document.getElementById('seasons-container');
+        fetch(endpoint)
+        .then(res => res.json())
+        .then(seasons => {
+            seasons.forEach(season => {
+            // Create a div for this season
+            const div = document.createElement('div');
+            div.className = 'season-entry';
+            div.style.border = '1px solid #ccc';
+            div.style.padding = '10px';
+            div.style.margin = '5px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            // Season name
+            const name = document.createElement('span');
+            name.textContent = season.name;
+            div.appendChild(name);
+
+            // Download button
+            const btn = document.createElement('button');
+            btn.textContent = 'Download';
+            btn.style.cursor = 'pointer';
+            btn.onclick = () => {
+                // triggers download
+                const a = document.createElement('a');
+                a.href = season.path;
+                a.download = season.path.split('/').pop(); // filename
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            div.appendChild(btn);
+
+            // Add div to container
+            container.appendChild(div);
+            });
+        })
+        .catch(err => console.error('Error fetching seasons:', err));
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>

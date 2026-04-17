@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Login</title>
+  <link rel="stylesheet" href="/main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    .section {
+      padding-top: 2em;
+      margin-top: -2em; /* Offset for fixed header if needed */
+    }
+    
+    .section:target {
+      animation: highlight 2s ease-in-out;
+    }
+    
+    @keyframes highlight {
+      0% { background-color: rgba(255, 255, 255, 0.1); }
+      50% { background-color: rgba(255, 255, 255, 0.2); }
+      100% { background-color: transparent; }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="index" style="margin-left: 2em;">Home</a>
+    <a class="title" href="uploads" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <!-- Login Section -->
+    <section id="login" class="section">
+      <h1>Login</h1>
+      <p style="margin-top: 2em;">Login to your account here!</p>
+      <p style="margin-top: 1em;">If you don't have an account, please register <a href="/register">here</a>.</p>
+      <form id="loginForm">
+        <label for="loginUsername">Username:</label>
+        <input type="text" id="loginUsername" name="loginUsername" required />
+        <br />
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="loginPassword" required />
+        <br /> 
+        <button type="submit">Login</button>
+        <p id="loginMessage" style="margin-top: 1em;"></p>
+      </form>
+      <p style="margin-top: 1em;">By using our services, you agree to the <a href="/raindrippy/privacy-policy.html">Privacy Policy</a>.</p>
+      <p style="margin-top: 1em;">Forgot your password? Contact support <a href="mailto:raindrippy.contact@protonmail.com">here</a>.</p>
+    </section>
+
+    <!-- Logout Section -->
+    <section id="logout" class="section">
+      <div id="logout-section" style="margin-top: 2em;">
+        <br><hr>
+        <h1>Logout</h1>
+        <p>Press the button below to logout of your account.</p>
+        <button id="logout-btn" style="margin-top: 0.2em;">Logout</button><br>
+        <p id="logout-output" style="margin-top: 1em;"></p>
+      </div>
+    </section>
+
+    <script>
+      
+      function generateDeviceFingerprint() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Device fingerprint', 2, 2);
+        
+        const fingerprint = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          new Date().getTimezoneOffset(),
+          navigator.hardwareConcurrency || 'unknown',
+          canvas.toDataURL()
+        ].join('|');
+        canvas.style.display = 'none';  
+        // Hash it for consistency
+        let hwid = btoa(fingerprint).substring(0, 32)
+        return hwid;
+      }
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      fetch('https://bakosmp.go.ro/api/login', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      })
+      .then(async response => {
+        const messageElement = document.getElementById('loginMessage');
+        const data = await response.json();
+
+        if (response.status === 200) {
+          messageElement.textContent = 'Login successful!';
+          messageElement.style.color = 'green';
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        } else {
+          messageElement.textContent = 'Login failed: ' + (data.message || 'Unknown error');
+          messageElement.style.color = 'red';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const messageElement = document.getElementById('loginMessage');
+        messageElement.textContent = 'An error occurred. Please try again.';
+        messageElement.style.color = 'red';
+      });
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById('logout-section').style.display = 'none';
+      document.getElementById('logout-output').style.display = 'none';
+      fetch('https://bakosmp.go.ro/api/logged-in', {
+        method: 'GET',
+        credentials: 'include'
+      }).then(async response => {
+        const data = await response.json();
+        if (response.status === 200 && data.loggedIn === true) {
+          document.getElementById('logout-section').style.display = 'inline-block';
+        } else {
+          document.getElementById('logout-section').style.display = 'none';
+        }
+      })
+      document.getElementById('logout-btn').addEventListener('click', function() {
+        fetch('https://bakosmp.go.ro/api/purge-logout', {
+          method: 'POST',
+          credentials: 'include'
+        })
+        .then(async response => {
+          if (response.status === 200) {
+            document.getElementById('logout-output').textContent = 'Logout successful!';
+            document.getElementById('logout-output').style.color = 'green';
+            document.getElementById('logout-output').style.display = 'inline-block';
+            setTimeout(() => {
+              window.location.reload();
+            }, 2000);
+          } else {
+            document.getElementById('logout-output').textContent = 'Logout failed. Please try again.';
+            document.getElementById('logout-output').style.color = 'red';
+            document.getElementById('logout-output').style.display = 'inline-block';
+            setTimeout(() => {
+              document.getElementById('logout-output').style.display = 'none';
+            }, 2000);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred. Please try again.');
+        });
+      });
+    });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>

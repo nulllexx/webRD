@@ -1,0 +1,1110 @@
+/*
+ * ddosprot.c  — Defensive DDoS detector & per-port blocker (AIO single-file)
+ *
+ * Build:
+ *   gcc -O2 -o ddosprot ddosprot.c -lpcap
+ *
+ * Installs/usage are provided in the PKGBUILD & systemd unit below.
+ *
+ * DESIGN/SAFETY SUMMARY:
+ * - Captures packets using libpcap ("ip or ip6" filter).
+ * - Tracks offending (src IP, dst port, proto) tuples with bucketed sliding windows.
+ * - Adds offending IP to nftables named sets (per-port, separate v4/v6 sets).
+ * - CLI supports runtime/persistent configuration via small files under /etc and /run.
+ * - Uses whitelist file (/etc/ddosprot.whitelist) to avoid false positives.
+ *
+ * IMPORTANT:
+ * - This program must be run with CAP_NET_RAW (pcap) and CAP_NET_ADMIN (nft)
+ *   — the provided systemd unit shows a recommended configuration.
+ * - For production-scale high-bandwidth attacks user-space pcap may drop packets;
+ *   use upstream/ISP scrubbing or kernel-space mitigations for line-rate attacks.
+ *
+ * The code is intentionally straightforward and documented so you can replace the
+ * nft-shell calls with libnftnl later if you prefer.
+ *
+ * References:
+ * - nftables sets / element timeouts (used for per-element time-limited blocking).
+ * - libpcap manual / pcap_open_live usage.
+ * - Arch PKGBUILD basics.
+ *
+ * (c) full protection not guaranteed, use as a last line of defense.
+ */
+
+#ifdef __linux__
+    #define _GNU_SOURCE
+    #include <pcap.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdarg.h>
+    #include <string.h>
+    #include <signal.h>
+    #include <unistd.h>
+    #include <time.h>
+    #include <arpa/inet.h>
+    #include <ctype.h>
+    #include <sys/stat.h>
+    #include <errno.h>
+    #include <inttypes.h>
+    #include <netinet/in.h>
+#else /* _WIN32 */
+    #include <pcap.h> /* Npcap/WinPcap */
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #include <windows.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <stdarg.h>
+    #include <string.h>
+    #include <time.h>
+    #include <ctype.h>
+    #include <errno.h>
+    #include <stdint.h>
+#endif
+
+/* ----------------- Configuration defaults (changeable via config files / CLI) ----------------- */
+#ifdef __linux__
+#define DEFAULT_CONF "/etc/ddosprot.conf"
+#define DEFAULT_WHITELIST "/etc/ddosprot.whitelist"
+#define RUNTIME_ARM_FILE "/run/ddosprot.armed"
+#define DEFAULT_LOGFILE "/var/log/ddosprot.log"
+#define DEFAULT_SAVEFILE "/var/lib/ddosprot/ddosprot.save"
+#else
+#define DEFAULT_CONF "C:\\ProgramData\\ddosprot\\ddosprot.conf"
+#define DEFAULT_WHITELIST "C:\\ProgramData\\ddosprot\\ddosprot.whitelist"
+#define RUNTIME_ARM_FILE "C:\\ProgramData\\ddosprot\\ddosprot.armed"
+#define DEFAULT_LOGFILE "C:\\ProgramData\\ddosprot\\ddosprot.log"
+#define DEFAULT_SAVEFILE "C:\\ProgramData\\ddosprot\\ddosprot.save"
+#endif
+
+#define DEFAULT_WINDOW_SECONDS 5       /* sliding window length */
+#define DEFAULT_BUCKETS 5              /* buckets inside the window (each bucket = WINDOW/BUCKETS sec) */
+#define DEFAULT_THRESHOLD 500          /* packets (per ip,per-port,per-proto) over the window to trigger */
+#define DEFAULT_INITIAL_BAN 60         /* initial ban secs */
+#define DEFAULT_MAX_BAN 3600           /* max progressive ban secs */
+#define NFT_OP_RATE_LIMIT 2            /* minimum seconds between nft operations for same IP/port */
+#define DEFAULT_IFACE "auto"
+/* hash table sizing (power of two) */
+#define TABLE_BITS 16
+#define TABLE_SIZE (1<<TABLE_BITS)
+
+/* limits */
+#define MAX_PORTS 256
+#define MAX_LINE 512
+#define MAX_WHITELIST 2048
+#define MAX_CMDLEN 256
+
+/* ----------------- data structures ----------------- */
+typedef enum { PROTO_TCP=6, PROTO_UDP=17, PROTO_ICMP=1, PROTO_ICMPV6=58 } proto_t;
+
+/* Counter entry per (ip,port,proto) */
+typedef struct {
+    uint8_t family;       /* AF_INET or AF_INET6 */
+    union {
+        uint32_t ip4;     /* network order */
+        struct in6_addr ip6;
+    } addr;
+    uint16_t port;        /* host order */
+    uint8_t proto;        /* IP protocol */
+    uint32_t counts[DEFAULT_BUCKETS]; /* bucket counts; runtime: uses configured buckets */
+    time_t last_seen;
+    time_t banned_at;     /* 0 if not currently banned by us */
+    time_t last_nft_op;   /* rate limit nft operations */
+    uint32_t ban_seconds; /* current ban duration for progressive backoff */
+    int in_use;
+} entry_t;
+
+typedef struct {
+    int family;           // AF_INET or AF_INET6
+    unsigned char addr[16]; // IPv4 uses first 4 bytes, IPv6 uses 16 bytes
+    int prefix_len;       // CIDR prefix length (e.g. 24)
+} cidr_t;
+
+/* prototypes */
+static int nft_create_table_chain(void);
+static int nft_ensure_port(uint16_t port);
+
+/* simple open-addressing hash table */
+static entry_t *htable = NULL;
+
+/* program runtime state & config (kept simple) */
+static volatile int running = 1;
+static volatile sig_atomic_t reload_flag = 0;
+static char iface_name[128] = DEFAULT_IFACE;
+static int armed = 1;             /* runtime armed; also read from RUNTIME_ARM_FILE on start */
+static char conf_file[256] = DEFAULT_CONF;
+static char whitelist_file[256] = DEFAULT_WHITELIST;
+static char logfile[256] = DEFAULT_LOGFILE;
+static char savefile[256] = DEFAULT_SAVEFILE;
+
+/* detection params (can be changed via setdefs in conf) */
+static int cfg_window = DEFAULT_WINDOW_SECONDS;
+static int cfg_buckets = DEFAULT_BUCKETS;
+static int cfg_threshold = DEFAULT_THRESHOLD;
+static int cfg_initial_ban = DEFAULT_INITIAL_BAN;
+static int cfg_max_ban = DEFAULT_MAX_BAN;
+
+/* protected ports list (array of uint16_t) */
+static uint16_t protected_ports[MAX_PORTS];
+static int protected_ports_n = 0;
+
+/* whitelist prefixes (IPv4 in CIDR string or IPv6) — runtime naive matching */
+static cidr_t whitelist_cidrs[MAX_WHITELIST];
+static int whitelist_n = 0;
+
+/* nft table/chain names */
+static const char *NFT_TABLE = "ddosprot";
+static const char *NFT_CHAIN = "input"; /* we create table inet ddosprot and chain input */
+/* ----------------- utility functions ----------------- */
+
+static void vlog(const char *fmt, ...) {
+    /* simple logger to stdout/stderr and logfile; systemd will capture stdout/stderr into journal */
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    /* also append to logfile if writable */
+    FILE *f = fopen(logfile, "a");
+    if (f) {
+        va_start(ap, fmt);
+        vfprintf(f, fmt, ap);
+        va_end(ap);
+        fclose(f);
+    }
+}
+
+/* trim whitespace */
+static void trim(char *s) {
+    char *p = s;
+    while (isspace((unsigned char)*p)) p++;
+    if (p != s) memmove(s, p, strlen(p)+1);
+    char *e = s + strlen(s) - 1;
+    while (e >= s && isspace((unsigned char)*e)) *e-- = '\0';
+}
+
+int parse_cidr(const char *cidr_str, cidr_t *cidr) {
+    char ip_str[INET6_ADDRSTRLEN];
+    char *slash;
+    int prefix_len;
+
+    // Copy input to temporary buffer to split
+    strncpy(ip_str, cidr_str, sizeof(ip_str));
+    ip_str[sizeof(ip_str)-1] = '\0';
+
+    slash = strchr(ip_str, '/');
+    if (!slash) return -1; // missing prefix
+
+    *slash = '\0';
+    prefix_len = atoi(slash + 1);
+
+    // Try IPv4 first
+    cidr->family = AF_INET;
+    if (inet_pton(AF_INET, ip_str, cidr->addr) == 1) {
+        if (prefix_len < 0 || prefix_len > 32) return -1;
+        cidr->prefix_len = prefix_len;
+        return 0;
+    }
+
+    // Try IPv6 next
+    cidr->family = AF_INET6;
+    if (inet_pton(AF_INET6, ip_str, cidr->addr) == 1) {
+        if (prefix_len < 0 || prefix_len > 128) return -1;
+        cidr->prefix_len = prefix_len;
+        return 0;
+    }
+
+    return -1; // invalid IP
+}
+
+int ip_in_cidr(const unsigned char *ip, const cidr_t *cidr) {
+    int bytes = cidr->prefix_len / 8;
+    int bits = cidr->prefix_len % 8;
+
+    if (memcmp(ip, cidr->addr, bytes) != 0) return 0;
+
+    if (bits == 0) return 1;
+
+    unsigned char mask = (0xFF << (8 - bits)) & 0xFF;
+    return ((ip[bytes] & mask) == (cidr->addr[bytes] & mask));
+}
+
+/* ----------------- config read/write ----------------- */
+
+/* read whitelist file (one CIDR/ip per line — naive matching in code below) */
+static void load_whitelist(void) {
+    whitelist_n = 0;
+    FILE *f = fopen(whitelist_file, "r");
+    if (!f) return;
+    char line[MAX_LINE];
+    while (fgets(line,sizeof(line),f) && whitelist_n < MAX_WHITELIST) {
+        trim(line);
+        if (line[0]=='\0' || line[0]=='#') continue;
+        if (parse_cidr(line, &whitelist_cidrs[whitelist_n]) == 0) {
+            whitelist_n++;
+        } else {
+            vlog("[ddosprot] invalid whitelist entry: %s\n", line);
+        }
+    }
+    fclose(f);
+}
+
+static void nft_reload_all_ports(void) {
+    nft_create_table_chain();
+    for (int i=0; i<protected_ports_n; i++) {
+        nft_ensure_port(protected_ports[i]);
+    }
+}
+
+static int is_whitelisted_addr_fd(int family, const void *addr) {
+    unsigned char ip_bin[16];
+    int ip_len = (family == AF_INET) ? 4 : 16;
+    memcpy(ip_bin, addr, ip_len);
+    for (int i=0; i<whitelist_n; i++) {
+        if (whitelist_cidrs[i].family != family) continue;
+        if (ip_in_cidr(ip_bin, &whitelist_cidrs[i])) return 1;
+    }
+    return 0;
+}
+
+
+/* read configuration file (simple key=value lines) */
+static void read_conf(const char *path) {
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    char line[MAX_LINE];
+    while (fgets(line,sizeof(line),f)) {
+        trim(line);
+        if (line[0]=='\0' || line[0]=='#') continue;
+        char *eq = strchr(line,'=');
+        if (!eq) continue;
+        *eq = '\0';
+        char *k = line;
+        char *v = eq+1;
+        trim(k); trim(v);
+        if (strcmp(k,"iface")==0) strncpy(iface_name, v, sizeof(iface_name)-1);
+        else if (strcmp(k,"window")==0) cfg_window = atoi(v);
+        else if (strcmp(k,"buckets")==0) cfg_buckets = atoi(v);
+        else if (strcmp(k,"threshold")==0) cfg_threshold = atoi(v);
+        else if (strcmp(k,"initial_ban")==0) cfg_initial_ban = atoi(v);
+        else if (strcmp(k,"max_ban")==0) cfg_max_ban = atoi(v);
+        else if (strcmp(k,"whitelist")==0) { strncpy(whitelist_file, v, sizeof(whitelist_file)-1); }
+        else if (strcmp(k,"logfile")==0) { strncpy(logfile, v, sizeof(logfile)-1); }
+    }
+    fclose(f);
+}
+
+/* runtime arm state: read /run/ddosprot.armed if present (1/0) */
+static void read_runtime_arm(void) {
+    FILE *f = fopen(RUNTIME_ARM_FILE, "r");
+    if (!f) return;
+    char buf[8];
+    if (fgets(buf,sizeof(buf),f)) {
+        if (buf[0] == '0') armed = 0; else armed = 1;
+    }
+    fclose(f);
+}
+
+/* write runtime arm file */
+static int write_runtime_arm(int val) {
+    FILE *f = fopen(RUNTIME_ARM_FILE, "w");
+    if (!f) { vlog("[ddosprot] failed to write runtime arm file: %s\n", strerror(errno)); return -1; }
+    fprintf(f, "%d\n", val ? 1 : 0);
+    fclose(f);
+    return 0;
+}
+
+/* persist default to conf: set default armed/unarmed in conf as default=armed/unarmed */
+static int setdef_persist(int val) {
+    /* naive: append or replace default line */
+    FILE *f = fopen(conf_file, "r");
+    char tmp[8192] = {0};
+    if (f) {
+        char line[MAX_LINE];
+        while (fgets(line,sizeof(line),f)) {
+            if (strncmp(line,"default=",8)==0) continue;
+            strncat(tmp, line, sizeof(tmp)-strlen(tmp)-1);
+        }
+        fclose(f);
+    }
+    FILE *w = fopen(conf_file, "w");
+    if (!w) { vlog("[ddosprot] cannot write %s: %s\n", conf_file, strerror(errno)); return -1; }
+    fprintf(w, "default=%s\n", val ? "armed" : "unarmed");
+    fputs(tmp, w);
+    fclose(w);
+    return 0;
+}
+
+/* ----------------- protected ports management ----------------- */
+
+static int port_index(uint16_t port) {
+    for (int i=0;i<protected_ports_n;i++) if (protected_ports[i]==port) return i;
+    return -1;
+}
+
+static void ports_list_print(void) {
+    for (int i=0;i<protected_ports_n;i++) {
+        printf("%u%s", protected_ports[i], (i+1<protected_ports_n)?",":"\n");
+    }
+    if (protected_ports_n==0) printf("(empty)\n");
+}
+
+static void ports_clear(void) {
+    protected_ports_n = 0;
+}
+
+/* add port (simple, no duplicates) */
+static int ports_add(uint16_t port) {
+    if (protected_ports_n >= MAX_PORTS) return -1;
+    if (port_index(port) >= 0) return 0;
+    protected_ports[protected_ports_n++] = port;
+    return 1;
+}
+
+/* remove port */
+static int ports_remove(uint16_t port) {
+    int idx = port_index(port);
+    if (idx < 0) return 0;
+    for (int i=idx;i<protected_ports_n-1;i++) protected_ports[i] = protected_ports[i+1];
+    protected_ports_n--;
+    return 1;
+}
+
+/* ----------------- nft helpers (shelling out) ----------------- */
+
+/* helper: create table/chain and ensure per-port sets exist for both v4 & v6
+ * This is called by nft-setup.sh normally, but we create sets dynamically on-demand below too.
+ */
+#ifdef __linux__
+static int nft_create_table_chain(void) {
+    char cmd[512];
+    /* create inet table & chain (idempotent) */
+    snprintf(cmd, sizeof(cmd), "nft add table inet %s 2>/dev/null || true", NFT_TABLE);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to create nft table %s: %s\n", NFT_TABLE, strerror(errno));
+        return -1;
+    }
+    /* create an input chain with accept policy if missing */
+    snprintf(cmd, sizeof(cmd),
+             "nft 'add chain inet %s %s { type filter hook input priority 0 ; policy accept ; }' 2>/dev/null || true",
+             NFT_TABLE, NFT_CHAIN);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to create nft chain %s/%s: %s\n", NFT_TABLE, NFT_CHAIN, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+#else 
+static void nft_create_table_chain(void) {
+    /* no-op for Windows */
+}
+#endif
+/* create per-port v4 & v6 set and rule (idempotent) */
+#ifdef __linux__
+static int nft_ensure_port(uint16_t port) {
+    char cmd[512];
+    char set4name[64], set6name[64];
+    snprintf(set4name,sizeof(set4name),"ddos_block_%u", port);
+    snprintf(set6name,sizeof(set6name),"ddos_block6_%u", port);
+
+    /* create v4 set (type ipv4_addr) */
+    snprintf(cmd, sizeof(cmd),
+             "nft add set inet %s %s { type ipv4_addr ; flags timeout ; } 2>/dev/null || true",
+             NFT_TABLE, set4name);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to create nft set for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+    /* add rule to drop packets whose src is in set and tcp/udp dest port matches */
+    snprintf(cmd, sizeof(cmd),
+             "nft add rule inet %s %s ip saddr @%s tcp dport %u drop 2>/dev/null || true",
+             NFT_TABLE, NFT_CHAIN, set4name, port);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to add nft rule for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+    snprintf(cmd, sizeof(cmd),
+             "nft add rule inet %s %s ip saddr @%s udp dport %u drop 2>/dev/null || true",
+             NFT_TABLE, NFT_CHAIN, set4name, port);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to add nft rule for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+
+    /* create v6 set (type ipv6_addr) and rules for ip6 */
+    snprintf(cmd, sizeof(cmd),
+             "nft add set inet %s %s { type ipv6_addr ; flags timeout ; } 2>/dev/null || true",
+             NFT_TABLE, set6name);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to create nft set for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+    snprintf(cmd, sizeof(cmd),
+             "nft add rule inet %s %s ip6 saddr @%s tcp dport %u drop 2>/dev/null || true",
+             NFT_TABLE, NFT_CHAIN, set6name, port);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to add nft rule for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+    snprintf(cmd, sizeof(cmd),
+             "nft add rule inet %s %s ip6 saddr @%s udp dport %u drop 2>/dev/null || true",
+             NFT_TABLE, NFT_CHAIN, set6name, port);
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] failed to add nft rule for port %u: %s\n", port, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+#else
+static void nft_ensure_port(uint16_t port) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd),
+        "netsh advfirewall firewall add rule name=\"ddos_block_%u_tcp\" dir=in action=block protocol=TCP localport=%u",
+        port, port);
+    system(cmd);
+    snprintf(cmd, sizeof(cmd),
+        "netsh advfirewall firewall add rule name=\"ddos_block_%u_udp\" dir=in action=block protocol=UDP localport=%u",
+        port, port);
+    system(cmd);
+}
+#endif
+/* add an IP (v4 or v6) element to the per-port set with timeout */
+#ifdef __linux__
+static void nft_add_element(int family, const char *ipstr, uint16_t port, uint32_t timeout_sec) {
+    char cmd[512];
+    if (family == AF_INET) {
+        snprintf(cmd, sizeof(cmd),
+                 "nft add element inet %s ddos_block_%u { %s timeout %us } 2>/dev/null || true",
+                 NFT_TABLE, port, ipstr, (unsigned)timeout_sec);
+        system(cmd);
+    } else {
+        snprintf(cmd, sizeof(cmd),
+                 "nft add element inet %s ddos_block6_%u { %s timeout %us } 2>/dev/null || true",
+                 NFT_TABLE, port, ipstr, (unsigned)timeout_sec);
+        system(cmd);
+    }
+}
+#else
+static void nft_add_element(int family, const char *ipstr, uint16_t port, uint32_t timeout_sec) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd),
+        "netsh advfirewall firewall add rule name=\"ddos_ip_%u_%s\" dir=in action=block remoteip=%s protocol=any localport=%u",
+        port, ipstr, ipstr, port);
+    system(cmd);
+    
+}
+#endif
+
+/* delete element (used for immediate unban if needed) */
+#ifdef __linux__
+static void nft_delete_element(int family, const char *ipstr, uint16_t port) {
+    char cmd[512];
+    if (family == AF_INET) {
+        snprintf(cmd, sizeof(cmd),
+                 "nft delete element inet %s ddos_block_%u { %s } 2>/dev/null || true",
+                 NFT_TABLE, port, ipstr);
+        system(cmd);
+    } else {
+        snprintf(cmd, sizeof(cmd),
+                 "nft delete element inet %s ddos_block6_%u { %s } 2>/dev/null || true",
+                 NFT_TABLE, port, ipstr);
+        system(cmd);
+    }
+}
+#else
+static void nft_delete_element(int family, const char *ipstr, uint16_t port) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd),
+        "netsh advfirewall firewall delete rule name=\"ddos_ip_%u_%s\"",
+        port, ipstr);
+    system(cmd);
+}
+#endif
+/* ----------------- hashing & table operations ----------------- */
+
+static inline uint64_t mix64(uint64_t x) {
+    x ^= x >> 33;
+    x *= 0xff51afd7ed558ccdULL;
+    x ^= x >> 33;
+    x *= 0xc4ceb9fe1a85ec53ULL;
+    x ^= x >> 33;
+    return x;
+}
+
+static uint64_t entry_hash4(uint32_t ip4, uint16_t port, uint8_t proto) {
+    uint64_t x = ((uint64_t)ip4) ^ ((uint64_t)port<<32) ^ ((uint64_t)proto<<48);
+    return mix64(x);
+}
+
+/* create or find entry for IPv4 */
+static entry_t *htable_get4(uint32_t ip4, uint16_t port, uint8_t proto) {
+    uint64_t h = entry_hash4(ip4, port, proto);
+    uint32_t idx = h & (TABLE_SIZE - 1);
+    for (uint32_t probes=0; probes < TABLE_SIZE; probes++) {
+        entry_t *e = &htable[idx];
+        if (!e->in_use) {
+            /* insert */
+            e->in_use = 1;
+            e->family = AF_INET;
+            e->addr.ip4 = ip4;
+            e->port = port;
+            e->proto = proto;
+            e->last_seen = time(NULL);
+            e->banned_at = 0;
+            e->last_nft_op = 0;
+            e->ban_seconds = 0;
+            for (int i=0;i<cfg_buckets;i++) e->counts[i]=0;
+            return e;
+        } else {
+            if (e->family==AF_INET && e->addr.ip4==ip4 && e->port==port && e->proto==proto) return e;
+        }
+        idx = (idx + 1) & (TABLE_SIZE - 1);
+    }
+    return NULL;
+}
+
+/* IPv6 hash / get (simple XOR of address words) */
+static uint64_t entry_hash6(const struct in6_addr *a, uint16_t port, uint8_t proto) {
+    uint64_t x = 0;
+    const uint64_t *p = (const uint64_t*)a->s6_addr;
+    x ^= p[0]; x ^= ((uint64_t)p[1]<<1);
+    x ^= ((uint64_t)port<<32); x ^= ((uint64_t)proto<<48);
+    return mix64(x);
+}
+
+static entry_t *htable_get6(const struct in6_addr *a6, uint16_t port, uint8_t proto) {
+    uint64_t h = entry_hash6(a6, port, proto);
+    uint32_t idx = h & (TABLE_SIZE - 1);
+    for (uint32_t probes=0; probes < TABLE_SIZE; probes++) {
+        entry_t *e = &htable[idx];
+        if (!e->in_use) {
+            e->in_use = 1;
+            e->family = AF_INET6;
+            e->addr.ip6 = *a6;
+            e->port = port;
+            e->proto = proto;
+            e->last_seen = time(NULL);
+            e->banned_at = 0;
+            e->last_nft_op = 0;
+            e->ban_seconds = 0;
+            for (int i=0;i<cfg_buckets;i++) e->counts[i]=0;
+            return e;
+        } else {
+            if (e->family==AF_INET6 && memcmp(&e->addr.ip6, a6, sizeof(*a6))==0 && e->port==port && e->proto==proto)
+                return e;
+        }
+        idx = (idx + 1) & (TABLE_SIZE - 1);
+    }
+    return NULL;
+}
+
+/* ----------------- detection logic ----------------- */
+
+/* called periodically (per-packet) to count and possibly ban */
+static void observe_and_maybe_ban_ipv4(uint32_t src_ip, uint16_t dst_port, uint8_t proto) {
+    /* check if port is protected */
+    if (port_index(dst_port) < 0) return;
+    /* whitelist? */
+    if (is_whitelisted_addr_fd(AF_INET, &src_ip)) return;
+
+    entry_t *e = htable_get4(src_ip, dst_port, proto);
+    if (!e) return;
+    time_t now = time(NULL);
+    int bucket = (now % cfg_buckets);
+    /* zero buckets if gap > window */
+    if (now - e->last_seen >= cfg_window) {
+        for (int i=0;i<cfg_buckets;i++) e->counts[i] = 0;
+    }
+    e->counts[bucket]++;
+    e->last_seen = now;
+
+    long sum = 0;
+    for (int i=0;i<cfg_buckets;i++) sum += e->counts[i];
+
+    if (armed && e->banned_at == 0 && sum >= cfg_threshold) {
+        /* progressive ban: escalate */
+        uint32_t ban = (e->ban_seconds == 0) ? cfg_initial_ban : e->ban_seconds * 2;
+        if (ban > cfg_max_ban) ban = cfg_max_ban;
+        e->ban_seconds = ban;
+        e->banned_at = now;
+        /* ensure nft set & rule exist for this port */
+        nft_ensure_port(dst_port);
+        char ipstr[INET_ADDRSTRLEN];
+        struct in_addr a; a.s_addr = src_ip;
+        inet_ntop(AF_INET, &a, ipstr, sizeof(ipstr));
+        /* rate limit nft ops */
+        if (now - e->last_nft_op >= NFT_OP_RATE_LIMIT) {
+            nft_add_element(AF_INET, ipstr, dst_port, ban);
+            e->last_nft_op = now;
+            vlog("[ddosprot] banned v4 %s port %u for %us (count=%ld)\n", ipstr, dst_port, ban, sum);
+        }
+    }
+
+    /* expire ban if needed — note nft element timeout may auto-expire too */
+    if (e->banned_at && (now - e->banned_at) > e->ban_seconds + 5) {
+        /* unban locally (we may rely on nft timeout but do a cleanup pass) */
+        char ipstr[INET_ADDRSTRLEN];
+        struct in_addr a; a.s_addr = src_ip;
+        inet_ntop(AF_INET, &a, ipstr, sizeof(ipstr));
+        nft_delete_element(AF_INET, ipstr, dst_port);
+        e->banned_at = 0;
+        /* zero counters to avoid immediate re-ban */
+        for (int i=0;i<cfg_buckets;i++) e->counts[i]=0;
+        vlog("[ddosprot] unbanned v4 %s port %u\n", ipstr, dst_port);
+    }
+}
+
+static void observe_and_maybe_ban_ipv6(const struct in6_addr *src_ip6, uint16_t dst_port, uint8_t proto) {
+    if (port_index(dst_port) < 0) return;
+    if (is_whitelisted_addr_fd(AF_INET6, src_ip6)) return;
+
+    entry_t *e = htable_get6(src_ip6, dst_port, proto);
+    if (!e) return;
+    time_t now = time(NULL);
+    int bucket = (now % cfg_buckets);
+    if (now - e->last_seen >= cfg_window) {
+        for (int i=0;i<cfg_buckets;i++) e->counts[i] = 0;
+    }
+    e->counts[bucket]++;
+    e->last_seen = now;
+    long sum = 0;
+    for (int i=0;i<cfg_buckets;i++) sum += e->counts[i];
+
+    if (armed && e->banned_at == 0 && sum >= cfg_threshold) {
+        uint32_t ban = (e->ban_seconds == 0) ? cfg_initial_ban : e->ban_seconds * 2;
+        if (ban > cfg_max_ban) ban = cfg_max_ban;
+        e->ban_seconds = ban;
+        e->banned_at = now;
+        nft_ensure_port(dst_port);
+        char ipstr[INET6_ADDRSTRLEN];
+        inet_ntop(AF_INET6, src_ip6, ipstr, sizeof(ipstr));
+        time_t now2 = time(NULL);
+        if (now2 - e->last_nft_op >= NFT_OP_RATE_LIMIT) {
+            nft_add_element(AF_INET6, ipstr, dst_port, ban);
+            e->last_nft_op = now2;
+            vlog("[ddosprot] banned v6 %s port %u for %us (count=%ld)\n", ipstr, dst_port, ban, sum);
+        }
+    }
+
+    if (e->banned_at && (now - e->banned_at) > e->ban_seconds + 5) {
+        char ipstr[INET6_ADDRSTRLEN];
+        inet_ntop(AF_INET6, src_ip6, ipstr, sizeof(ipstr));
+        nft_delete_element(AF_INET6, ipstr, dst_port);
+        e->banned_at = 0;
+        for (int i=0;i<cfg_buckets;i++) e->counts[i]=0;
+        vlog("[ddosprot] unbanned v6 %s port %u\n", ipstr, dst_port);
+    }
+}
+
+/* ----------------- pcap packet handler ----------------- */
+
+/* Simple parser for Ethernet + IPv4/IPv6 headers. We only need src addr, dst port & proto.
+ * This code deliberately keeps parsing simple and focuses on common cases (TCP/UDP).
+ */
+static void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
+    (void)user;
+    (void)h;
+    if (h->len < 14) return; /* not an ethernet frame */
+    const u_char *eth = bytes;
+    uint16_t ethertype = (eth[12]<<8) | eth[13];
+
+    if (ethertype == 0x0800) {
+        /* IPv4 */
+        if (h->len < 14+20) return;
+        const u_char *ip = bytes + 14;
+        uint8_t ihl = (ip[0] & 0x0F) * 4;
+        if (ihl < 20) return;
+        uint8_t proto = ip[9];
+        uint32_t src4;
+        memcpy(&src4, ip + 12, 4); /* network order */
+        /* TCP */
+        if (proto == 6 && h->len >= 14 + ihl + 4) {
+            const u_char *tcp = ip + ihl;
+            uint16_t dstport = (tcp[2]<<8) | tcp[3];
+            observe_and_maybe_ban_ipv4(src4, dstport, proto);
+        } else if (proto == 17 && h->len >= 14 + ihl + 4) {
+            const u_char *udp = ip + ihl;
+            uint16_t dstport = (udp[2]<<8) | udp[3];
+            observe_and_maybe_ban_ipv4(src4, dstport, proto);
+        } else {
+            /* other proto (ICMP, etc) mapped to port 0 */
+            observe_and_maybe_ban_ipv4(src4, 0, proto);
+        }
+    } else if (ethertype == 0x86dd) {
+        /* IPv6 */
+        if (h->len < 14 + 40) return;
+        const u_char *ip6 = bytes + 14;
+        struct in6_addr src6;
+        memcpy(&src6.s6_addr, ip6 + 8, 16); /* src addr at offset 8 in IPv6 header */
+        uint8_t next = ip6[6];
+        /* Skip extension headers properly is complex; assume no ext headers for simplicity */
+        if (next == 6 && h->len >= 14 + 40 + 4) {
+            const u_char *tcp = ip6 + 40;
+            uint16_t dstport = (tcp[2]<<8) | tcp[3];
+            observe_and_maybe_ban_ipv6(&src6, dstport, 6);
+        } else if (next == 17 && h->len >= 14 + 40 + 4) {
+            const u_char *udp = ip6 + 40;
+            uint16_t dstport = (udp[2]<<8) | udp[3];
+            observe_and_maybe_ban_ipv6(&src6, dstport, 17);
+        } else {
+            observe_and_maybe_ban_ipv6(&src6, 0, next);
+        }
+    } else {
+        /* other ethertypes ignored */
+    }
+}
+
+/* ----------------- CLI handlers (all commands must be available) ----------------- */
+
+/* helpers for printing/setting configs via CLI (these are intended to be used
+   from scripts or directly by the ops team) */
+
+/* print protected port list */
+static void cmd_portlist(void) {
+    ports_list_print();
+}
+
+/* pl_empty */
+static void cmd_pl_empty(void) {
+    ports_clear();
+    printf("ok\n");
+}
+
+/* port_add <port> */
+static void cmd_port_add(const char *arg) {
+    int p = atoi(arg);
+    if (p <= 0 || p > 65535) { fprintf(stderr,"invalid port\n"); exit(2); }
+    int r = ports_add((uint16_t)p);
+    if (r < 0) { fprintf(stderr,"failed\n"); exit(2); }
+    /* ensure nft structures exist for this port right away */
+    if (nft_ensure_port((uint16_t)p) < 0) {
+        fprintf(stderr,"failed to ensure nft port %u\n", p);
+        exit(2);
+    } else printf("ok\n");
+}
+
+/* port_del <port> */
+static void cmd_port_del(const char *arg) {
+    int p = atoi(arg);
+    if (p <= 0 || p > 65535) { fprintf(stderr,"invalid port\n"); exit(2); }
+    int r = ports_remove((uint16_t)p);
+    if (!r) { fprintf(stderr,"not found\n"); exit(2); }
+    printf("ok\n");
+}
+
+/* setinterface <name|"auto"> */
+static void cmd_setinterface(const char *arg) {
+    strncpy(iface_name, arg, sizeof(iface_name)-1);
+    /* persist to conf file */
+    FILE *f = fopen(conf_file, "r");
+    char tmp[8192] = {0};
+    if (f) {
+        char line[MAX_LINE];
+        while (fgets(line,sizeof(line),f)) {
+            if (strncmp(line,"iface=",6)==0) continue;
+            strncat(tmp, line, sizeof(tmp)-strlen(tmp)-1);
+        }
+        fclose(f);
+    }
+    FILE *w = fopen(conf_file, "w");
+    if (!w) { fprintf(stderr,"failed to write conf\n"); exit(2); }
+    fprintf(w, "iface=%s\n", iface_name);
+    fputs(tmp, w);
+    fclose(w);
+    printf("ok\n");
+}
+
+/* getlogloc */
+static void cmd_getlogloc(void) {
+    printf("%s\n", logfile);
+}
+
+/* setlogloc <path> */
+static void cmd_setlogloc(const char *arg) {
+    strncpy(logfile, arg, sizeof(logfile)-1);
+    /* persist to conf */
+    FILE *f = fopen(conf_file, "r");
+    char tmp[8192] = {0};
+    if (f) {
+        char line[MAX_LINE];
+        while (fgets(line,sizeof(line),f)) {
+            if (strncmp(line,"logfile=",8)==0) continue;
+            strncat(tmp, line, sizeof(tmp)-strlen(tmp)-1);
+        }
+        fclose(f);
+    }
+    FILE *w = fopen(conf_file, "w");
+    if (!w) { fprintf(stderr,"failed to write conf\n"); exit(2); }
+    fprintf(w, "logfile=%s\n", logfile);
+    fputs(tmp, w);
+    fclose(w);
+    printf("ok\n");
+}
+
+/* arm / disarm / setdef <armed|unarmed> */
+static void cmd_arm(void)  { if (write_runtime_arm(1) == 0) printf("armed\n"); else printf("failed to arm\n"); }
+static void cmd_disarm(void){ if (write_runtime_arm(0) == 0) printf("disarmed\n"); else printf("failed to disarm\n"); }
+static void cmd_setdef(const char *arg) {
+    if (strcmp(arg,"armed")==0) { if (setdef_persist(1) == 0) printf("ok\n"); else printf("failed to set default armed\n"); }
+    else if (strcmp(arg,"unarmed")==0) { if (setdef_persist(0) == 0) printf("ok\n"); else printf("failed to set default unarmed\n"); }
+    else { fprintf(stderr,"usage: setdef armed|unarmed\n"); exit(2); }
+}
+
+/* getstatus (simple) */
+static void cmd_getstatus(void) {
+    printf("ddosprot status overview:\n");
+    if (armed == 1) printf("  armed,\n"); else printf("  disarmed,\n");
+    printf("  ports=");
+    if (protected_ports_n == 0) {
+        printf("(empty)\n");
+    } else {
+        for (int i = 0; i < protected_ports_n; i++) {
+            printf("%u%s", protected_ports[i], (i + 1 < protected_ports_n) ? "," : "\n");
+        }
+    }
+}
+
+/* generic command dispatcher */
+static void handle_cli_args(int argc, char **argv) {
+    if (argc < 2 || (argc >= 2 && (strcmp(argv[1], "help") == 0 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0))) {
+        fprintf(stdout, "Usage: %s <command> [args...]\n", argv[0]);
+        fprintf(stdout, "Commands:\n");
+        fprintf(stdout, "  arm\n");
+        fprintf(stdout, "  disarm\n");
+        fprintf(stdout, "  setdef <armed|unarmed>\n");
+        fprintf(stdout, "  portlist\n");
+        fprintf(stdout, "  pl_empty\n");
+        fprintf(stdout, "  port_add <port>\n");
+        fprintf(stdout, "  port_del <port>\n");
+        fprintf(stdout, "  setinterface <name|auto>\n");
+        fprintf(stdout, "  getlogloc\n");
+        fprintf(stdout, "  setlogloc <path>\n");
+        fprintf(stdout, "  getstatus\n");
+        fprintf(stdout, "  boot\n");
+        fprintf(stdout, "  marksetup complete/incomplete\n");
+        exit(1);
+        
+    }    
+    if (strcmp(argv[1],"arm")==0) { cmd_arm(); exit(0); }
+    if (strcmp(argv[1],"disarm")==0) { cmd_disarm(); exit(0); }
+    if (strcmp(argv[1],"setdef")==0 && argc>=3) { cmd_setdef(argv[2]); exit(0); }
+    if (strcmp(argv[1],"portlist")==0) { cmd_portlist(); exit(0); }
+    if (strcmp(argv[1],"pl_empty")==0) { cmd_pl_empty(); exit(0); }
+    if (strcmp(argv[1],"port_add")==0 && argc>=3) { cmd_port_add(argv[2]); exit(0); }
+    if (strcmp(argv[1],"port_del")==0 && argc>=3) { cmd_port_del(argv[2]); exit(0); }
+    if (strcmp(argv[1],"setinterface")==0 && argc>=2) { cmd_setinterface(argv[2]); exit(0); }
+    if (strcmp(argv[1],"getlogloc")==0) { cmd_getlogloc(); exit(0); }
+    if (strcmp(argv[1],"setlogloc")==0 && argc>=3) { cmd_setlogloc(argv[2]); exit(0); }
+    if (strcmp(argv[1],"getstatus")==0) { cmd_getstatus(); exit(0); }
+    if (strcmp(argv[1],"marksetup")==0 && argc>=3) {
+        if (strcmp(argv[2],"complete")==0) {
+            if (writeSetup("1") == 0) { printf("setup marked complete\n"); exit(0); }
+            else { fprintf(stderr,"failed to mark setup complete\n"); exit(2); }
+        } else if (strcmp(argv[2],"incomplete")==0) {
+            if (writeSetup("0") == 0) { printf("setup marked incomplete\n"); exit(0); }
+            else { fprintf(stderr,"failed to mark setup incomplete\n"); exit(2); }
+        } else {
+            fprintf(stderr,"usage: marksetup complete/incomplete\n");
+            exit(2);
+        }
+    }
+    if (strcmp(argv[1],"boot")==0) { return; }
+    /* add more as needed */
+    fprintf(stderr,"unknown command\n");
+    exit(2);
+}
+
+/* ----------------- signal handling ----------------- */
+#ifdef __linux__
+static void sigint_handler(int x) {
+    (void)x;
+    running = 0;
+}
+#else 
+static BOOL WINAPI console_handler(DWORD type) {
+    running = 0;
+    return TRUE;
+}
+#endif
+
+/* ----------------- interface auto-detect (very simple) ----------------- */
+/* For auto detection we parse /sys/class/net and pick first non-loopback.
+ * On containerized systems this may be different; allow explicit override via conf.
+ */
+#ifdef __linux__
+static void autodetect_iface(char *out, size_t outlen) {
+    FILE *f;
+    const char *dir = "/sys/class/net";
+    /* open dir and pick first entry that is not 'lo' and not virtual like 'docker' */
+    /* keep it simple: read the directory using popen ls */
+    char cmd[256];
+    snprintf(cmd,sizeof(cmd),"ls -1 %s", dir);
+    f = popen(cmd,"r");
+    if (!f) { strncpy(out, "eth0", outlen-1); return; }
+    char buf[128];
+    while (fgets(buf,sizeof(buf),f)) {
+        trim(buf);
+        if (buf[0]=='\0') continue;
+        if (strcmp(buf,"lo")==0) continue;
+        /* accept it */
+        snprintf(out, outlen, "%s", buf);
+        pclose(f);
+        return;
+    }
+    pclose(f);
+    strncpy(out, "eth0", outlen-1);
+}
+#else
+static void autodetect_iface(char *out, size_t outlen) {
+    pcap_if_t *alldevs, *d;
+    char errbuf[PCAP_ERRBUF_SIZE];
+    if (pcap_findalldevs(&alldevs, errbuf) == -1 || !alldevs) {
+        strncpy(out, "eth0", outlen - 1);
+        return;
+    }
+    for (d = alldevs; d; d = d->next) {
+        if (!(d->flags & PCAP_IF_LOOPBACK)) {
+            strncpy(out, d->name, outlen - 1);
+            break;
+        }
+    }
+    pcap_freealldevs(alldevs);
+}
+#endif
+
+static int setup() {
+    FILE *fp = fopen(savefile, "r");
+    if (fp) {
+        fseek(fp, 0, SEEK_END);
+        long size = ftell(fp);
+        if (size == 0) {
+            fclose(fp);
+            fp = fopen(savefile, "w");
+            if (fp) fprintf(fp, "setup=0");
+            fclose(fp);
+        } else {
+            char line[MAX_LINE];
+            if (fgets(line, sizeof(line), fp)) {
+                if (strncmp(line, "setup=1", 7) == 0) {
+                    fclose(fp);
+                    vlog("[ddosprot] already setup, skipping\n");
+                    return 0;
+                }
+            }
+            fclose(fp);
+        }
+    }
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "nft add table inet ddosprot");
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] SETUP1 failed: %s\n", stderror(errno));
+        return -1;
+    }
+    snprintf(cmd, sizeof(cmd), "nft add set inet ddosprot whitelist { type ipv4_addr; flags interval; }");
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] SETUP2 failed: %s\n", strerror(errno));
+        return -1;
+    }
+    snprintf(cmd, sizeof(cmd), "nft add set inet ddosprot whitelistv6 { type ipv6_addr; flags interval; }");
+    if (system(cmd) != 0) {
+        vlog("[ddosprot] SETUP3 failed: %s\n", strerror(errno));
+        return -1;
+    }
+    if (writeSetup("1"); != 0) {
+        vlog("[ddosprot] failed to write setup file %s\n", savefile);
+        return -1;
+    }
+    vlog("[ddosprot] setup complete\n");
+    return 0;
+}
+static int writeSetup(char variable[128]) {
+    FILE *fp = fopen(savefile, "w");
+    if (!fp) {
+        vlog("[ddosprot] failed to write setup file %s: %s\n", savefile, strerror(errno));
+        return -1;
+    }
+    fprintf(fp, "setup=%s\n", variable);
+    fclose(fp);
+    vlog("[ddosprot] setup complete\n");
+    return 0;
+}
+/* ----------------- main daemon loop ----------------- */
+
+int main(int argc, char **argv) {
+    /* CLI may operate on small commands; handle them and exit if present */
+    handle_cli_args(argc, argv);
+    if (setup() != 0) {
+        fprintf(stderr, "[ddosprot] setup failed\n");
+        fprintf(stderr, "[ddosprot] please run the following commands manually & fix any problems that might appear to manually complete setup\n");
+        fprintf(stderr, "[ddosprot] after troubleshooting, run 'ddosprot mark_setup complete' to let the program know it worked\n");
+        fprintf(stderr, "[ddosprot]   'nft add table inet ddosprot'\n");
+        fprintf(stderr, "[ddosprot]   'nft add set inet ddosprot whitelist { type ipv4_addr; flags interval; }'\n");
+        fprintf(stderr, "[ddosprot]   'nft add set inet ddosprot whitelistv6 { type ipv6_addr; flags interval; }'\n");
+        return 1;
+    }
+    /* read conf & runtime state */
+    read_conf(conf_file);
+    read_runtime_arm();
+    load_whitelist();
+    nft_reload_all_ports();
+    /* if interface is auto, detect */
+    if (strcmp(iface_name, "auto")==0) {
+        autodetect_iface(iface_name, sizeof(iface_name));
+    }
+
+    /* initialize htable */
+    htable = calloc(TABLE_SIZE, sizeof(entry_t));
+    if (!htable) { fprintf(stderr,"calloc failed\n"); return 2; }
+
+    /* create nft table/chain if missing */
+    nft_create_table_chain();
+    /* ensure existing protected ports have nft objects created */
+    for (int i=0;i<protected_ports_n;i++) nft_ensure_port(protected_ports[i]);
+
+    /* prepare pcap */
+    char errbuf[PCAP_ERRBUF_SIZE];
+    pcap_t *pcap = pcap_open_live(iface_name, 65535, 1, 1000, errbuf);
+    if (!pcap) { fprintf(stderr,"pcap_open_live failed: %s\n", errbuf); return 2; }
+    /* set filter to only IP traffic to reduce processing */
+    struct bpf_program fp;
+    if (pcap_compile(pcap, &fp, "ip or ip6", 1, PCAP_NETMASK_UNKNOWN) == 0) {
+        pcap_setfilter(pcap, &fp);
+        pcap_freecode(&fp);
+    }
+    #ifdef _WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2,2), &wsaData);
+    SetConsoleCtrlHandler(console_handler, TRUE);
+    #else
+    signal(SIGINT, sigint_handler);
+    signal(SIGTERM, sigint_handler);
+    #endif
+
+    vlog("[ddosprot] starting on iface=%s, logfile=%s\n", iface_name, logfile);
+
+    /* main loop: pcap_dispatch will invoke packet_handler */
+    while (running) {
+        /* refresh runtime arm file & whitelist periodically */
+        read_runtime_arm();
+        /* note: reload whitelist more slowly in real product to avoid fs thrash; kept simple here */
+        /* handle up to 10 pkts per dispatch */
+        pcap_dispatch(pcap, 50, packet_handler, NULL);
+        /* small sleep to avoid busy looping */
+        usleep(100000); /* 100ms */
+    }
+
+    pcap_close(pcap);
+    free(htable);
+    vlog("[ddosprot] exiting\n");
+    return 0;
+}
+
+/*
+ * setup -- run script once to create nft table/chain and sets
+ * 
+ * #!/bin/bash
+ * nft add table inet ddosprot
+ * nft add set inet ddosprot whitelist { type ipv4_addr; flags interval; }
+ * nft add set inet ddosprot whitelistv6 { type ipv6_addr; flags interval; }
+ *
+ * Build pkg: makepkg -si (in source dir)
+ * Build windows: x86_64-w64-mingw32-gcc -O2 -o ddosprot.exe ddosprot.c -lwpcap -lpacket -lws2_32 -liphlpapi
+*/
