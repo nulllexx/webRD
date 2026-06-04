@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Finish Signup</title>
+  <link rel="stylesheet" href="/main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .section {
+      padding-top: 2em;
+      margin-top: -2em;
+    }
+  </style>
+  <script src="/js/events.js" defer></script>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
+    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <section id="finish-signup" class="section">
+      <h1>One more step</h1>
+      <p style="margin-top: 2em;">You're almost in! Pick a username to finish creating your BakoSMP account.</p>
+      <form id="finishSignupForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required autocomplete="username" />
+        <br />
+        <br />
+        <button type="submit">Create account</button>
+        <p id="finishMessage" style="margin-top: 1em;"></p>
+      </form>
+      <p style="margin-top: 1em;">By using our services, you agree to the <a href="/raindrippy/privacy-policy.html">Privacy Policy</a>.</p>
+    </section>
+    <script>
+      function generateDeviceFingerprint() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('Device fingerprint', 2, 2);
+
+        const fingerprint = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          new Date().getTimezoneOffset(),
+          navigator.hardwareConcurrency || 'unknown',
+          canvas.toDataURL()
+        ].join('|');
+        canvas.style.display = 'none';
+        let hwid = btoa(fingerprint).substring(0, 32);
+        return hwid;
+      }
+
+      document.getElementById('finishSignupForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const hwid = generateDeviceFingerprint();
+        const messageElement = document.getElementById('finishMessage');
+
+        messageElement.textContent = 'Creating your account...';
+        messageElement.style.color = '#ccc';
+
+        fetch('https://bakosmp.go.ro/api/auth/oauth/google/complete', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ username, hwid })
+        })
+        .then(async response => {
+          const data = await response.json().catch(() => ({}));
+
+          if (response.status === 200) {
+            messageElement.textContent = 'Account created! Redirecting...';
+            messageElement.style.color = 'green';
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1500);
+          } else if (response.status === 409) {
+            messageElement.textContent = 'That username is taken. Please try another.';
+            messageElement.style.color = 'red';
+          } else if (response.status === 401) {
+            messageElement.textContent = 'Your sign-in session expired. Please sign in with Google again.';
+            messageElement.style.color = 'red';
+            setTimeout(() => {
+              window.location.href = '/login.html';
+            }, 2500);
+          } else {
+            messageElement.textContent = 'Could not finish signup: ' + (data.message || 'Unknown error');
+            messageElement.style.color = 'red';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          messageElement.textContent = 'A network error occurred. Please try again.';
+          messageElement.style.color = 'red';
+        });
+      });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>

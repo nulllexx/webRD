@@ -1,19 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Error</title>
-<style>
-html { color-scheme: light dark; }
-body { width: 35em; margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RainDrippy - Internal Server Error</title>
+    <link rel="stylesheet" href="/raindrippy/index.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <style>
+        button {
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1abc9c;
+        }
+    </style>
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-<h1>An error occurred.</h1>
-<p>Sorry, the page you are looking for is currently unavailable.<br/>
-Please try again later.</p>
-<p>If you are the system administrator of this resource then you should check
-the error log for details.</p>
-<p><em>Faithfully yours, nginx.</em></p>
+    <div id="topbar">
+        <img src="/raindrippy/rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='/raindrippy/index'">
+        <span class="tpbar-txt" style="margin-left: 20px;">RainDrippy</span>
+        <a class="tpbar-txt" href="/raindrippy/profile" style="margin-left: 2em;">Profile</a>
+    </div>
+    <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+    <div id="content" style="text-align: center; margin-top: 150px;">
+        <h1>Internal Server Error</h1>
+        <p>An error occurred while processing your request.</p>
+        <p>Please try again later.</p>
+        <p>If you think this is an error, please <a href="mailto:raindrippy.contact@protonmail.com">contact us</a>.</p>
+        <button onclick="window.location.href='/raindrippy/index'">Go to Home</button>
+    <script src="/js/topbar-show.js"></script>
+    <script src="/js/genFP.js"></script>
 </body>
 </html>
