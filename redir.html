@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BakoSMP - Redirecting...</title>
+  <link rel="stylesheet" href="/main.css"/>
+  <link rel="stylesheet" href="/cookie.css">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    .section {
+      padding-top: 2em;
+      margin-top: -2em; /* Offset for fixed header if needed */
+    }
+    
+    .section:target {
+      animation: highlight 2s ease-in-out;
+    }
+    
+    @keyframes highlight {
+      0% { background-color: rgba(255, 255, 255, 0.1); }
+      50% { background-color: rgba(255, 255, 255, 0.2); }
+      100% { background-color: transparent; }
+    }
+  </style>
+  <script src="/js/events.js" defer></script>
+</head>
+<body>
+  <div class="particles" id="particles-js"></div>
+  <div class="topbar">
+    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
+    <span class="title">BakoSMP</span>
+    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
+    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
+    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
+    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
+  </div>
+  <div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+  </div>
+  <script src="/js/cookies.js"></script>
+  <div class="content">
+    <h1>Redirecting...</h1>
+    <p>You are being redirected. Not working?</p>
+    <button id="manualRedirect">Click here to redirect</button>
+    <script>
+      (async () => {
+        const dictionary = await fetch('/redirects.json').then(res => res.json()).catch(err => {
+          console.error('Failed to load redirects.json:', err);
+          return {};
+        });
+        function redirect() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const from = urlParams.get('from');
+          if (!from) {
+            window.location.href = '/index';
+            return;
+          }
+          const redirectUrl = dictionary[from.split('.')[0]] || '/index';
+          window.location.href = redirectUrl;
+        }
+        document.getElementById('manualRedirect').addEventListener('click', redirect);
+        document.addEventListener('DOMContentLoaded', redirect);
+      })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="particles.js"></script>
+    <script src="/js/genFP.js"></script>
+  </div>
+</body>
+</html>
