@@ -125,6 +125,7 @@
     <script>
         let rawMarkdown = ''; // Store the raw markdown content for editing
         const popupOkBtn = document.getElementById('popup-ok-btn');
+        const popupMessage = document.getElementById('popup-message');
         document.addEventListener('DOMContentLoaded', async () => {
             const wikiContainer = document.getElementById('history-wiki');
             const editorContainer = document.getElementById('history-editor');
@@ -133,7 +134,7 @@
             const editMessage = document.getElementById('edit-message');
             const editButton = document.getElementById('edit-btn');
             const errorPopup = document.getElementById('error-popup');
-            const popupMessage = document.getElementById('popup-message');
+
 
             // 1. Check user role to show/hide edit button
             try {
