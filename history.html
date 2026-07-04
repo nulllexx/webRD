@@ -209,7 +209,7 @@
                         method: 'PATCH',
                         credentials: 'include',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: newMarkdown })
+                        body: JSON.stringify({ edited_content: newMarkdown })
                     });
 
                     if (!res.ok) throw new Error(`Save failed: ${res.statusText}`);
