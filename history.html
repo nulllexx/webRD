@@ -123,6 +123,7 @@
     <script src="/js/genFP.js"></script>
     <script>
         let rawMarkdown = ''; // Store the raw markdown content for editing
+        const popupOkBtn = document.getElementById('popup-ok-btn');
         document.addEventListener('DOMContentLoaded', async () => {
             const wikiContainer = document.getElementById('history-wiki');
             const editorContainer = document.getElementById('history-editor');
@@ -132,7 +133,6 @@
             const editButton = document.getElementById('edit-btn');
             const errorPopup = document.getElementById('error-popup');
             const popupMessage = document.getElementById('popup-message');
-            const popupOkBtn = document.getElementById('popup-ok-btn');
 
             // 1. Check user role to show/hide edit button
             try {
@@ -183,7 +183,6 @@
             const editButton = document.getElementById('edit-btn');
             const pageTitle = document.getElementById('page-title');
             const lastEdited = document.getElementById('last-edited');
-            const popupOkBtn = document.getElementById('popup-ok-btn');
             // Switch to edit mode
             wikiContainer.style.display = 'none';
             editorContainer.style.display = 'block';
