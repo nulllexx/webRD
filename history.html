@@ -73,6 +73,7 @@
             background-color: #3498db;
         }
     </style>
+    <link rel="stylesheet" href="/cookie.css">
 </head>
 <body>
     <div class="particles" id="particles-js"></div>
@@ -183,12 +184,14 @@
             const editorButtons = document.getElementById('editor-buttons');
             const editButton = document.getElementById('edit-btn');
             const pageTitle = document.getElementById('page-title');
+            const lastEdited = document.getElementById('last-edited');
 
             // Switch to edit mode
             wikiContainer.style.display = 'none';
             editorContainer.style.display = 'block';
             editButton.style.display = 'none';
             pageTitle.textContent = 'Editing History';
+
 
             // Populate textarea and create buttons
             editorTextarea.value = rawMarkdown;
@@ -197,39 +200,39 @@
                 <button id="cancel-btn">Cancel</button>
             `;
 
-            // --- Event listeners for new buttons ---
-            document.getElementById('save-btn').addEventListener('click', async () => {
-                const newMarkdown = editorTextarea.value;
-                const editMessage = document.getElementById('edit-message');
-                editMessage.textContent = 'Saving...';
-                editMessage.style.color = '#ccc';
-
-                try {
-                    const res = await fetch('/api/history/wiki/edit', {
-                        method: 'PATCH',
-                        credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ edited_content: newMarkdown })
-                    });
-
-                    if (!res.ok) throw new Error(`Save failed: ${res.statusText}`);
-
-                    // Update content and switch back to view mode
-                    rawMarkdown = newMarkdown;
-                    wikiContainer.innerHTML = DOMPurify.sanitize(marked.parse(newMarkdown));
-                    switchToViewMode();
-                    editMessage.textContent = '';
-
-                } catch (error) {
-                    console.error('Error saving history:', error);
-                    editMessage.textContent = ''; // Clear 'Saving...' message
-                    showErrorPopup('Could not save the content. The server might be down or you may not have permission. Please try again later.');
-                }
-            });
-
-            document.getElementById('cancel-btn').addEventListener('click', () => {
-                switchToViewMode();
-            });
+             // --- Event listeners for new buttons ---
+             document.getElementById('save-btn').addEventListener('click', async () => {
+                 const newMarkdown = editorTextarea.value;
+                 const editMessage = document.getElementById('edit-message');
+                 editMessage.textContent = 'Saving...';
+                 editMessage.style.color = '#ccc';
+ 
+                 try {
+                     const res = await fetch('/api/history/wiki/edit', {
+                         method: 'PATCH',
+                         credentials: 'include',
+                         headers: { 'Content-Type': 'application/json' },
+                         body: JSON.stringify({ edited_content: newMarkdown })
+                     });
+ 
+                     if (!res.ok) throw new Error(`Save failed: ${res.statusText}`);
+ 
+                     // Update content and switch back to view mode
+                     rawMarkdown = newMarkdown;
+                     wikiContainer.innerHTML = DOMPurify.sanitize(marked.parse(newMarkdown));
+                     switchToViewMode();
+                     editMessage.textContent = '';
+ 
+                 } catch (error) {
+                     console.error('Error saving history:', error);
+                     editMessage.textContent = ''; // Clear 'Saving...' message
+                     showErrorPopup('Could not save the content. The server might be down or you may not have permission. Please try again later.');
+                 }
+             });
+ 
+             document.getElementById('cancel-btn').addEventListener('click', () => {
+                 switchToViewMode();
+             });
         });
 
         function switchToViewMode() {
