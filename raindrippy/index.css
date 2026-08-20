@@ -202,8 +202,12 @@ html[data-theme="dark"] :where(.rd-page) samp { color: var(--accent); }
 
 /* the fade-in is only armed when JS is running, so a JS-blocked visitor gets a
    visible topbar instead of a permanently invisible one */
-html.js :where(.rd-page) #topbar { opacity: 0; transform: translateY(-14px); }
-:where(.rd-page) #topbar.show    { opacity: 1; transform: none; }
+/* Both rules must carry the html.js prefix. :where() adds no specificity, so
+   `html.js ... #topbar` is (1,1,1) and a bare `... #topbar.show` would be
+   (1,1,0) - the hidden state would outrank the shown state and the topbar
+   would never appear. Keep these two selectors in lockstep. */
+html.js :where(.rd-page) #topbar      { opacity: 0; transform: translateY(-14px); }
+html.js :where(.rd-page) #topbar.show { opacity: 1; transform: none; }
 
 :where(.rd-page) #topbar::after {
     content: "";
