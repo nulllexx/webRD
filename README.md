@@ -73,7 +73,7 @@ back to their "unavailable" states. To preview them populated, drop fixtures at
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **GNU GPL v3**. See the [LICENSE](LICENSE) file for details.
 
