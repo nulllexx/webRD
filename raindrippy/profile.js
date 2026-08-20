@@ -36,15 +36,15 @@ async function keyHandler() {
     const keyOutput = document.getElementById('key-output');
     keyOutput.textContent = apiKey;
     const copyButton = document.getElementById('copy-api-key');
-    copyButton.style.display = 'inline-block';
+    copyButton.hidden = false;
     const hideKeyButton = document.getElementById('hide-key');
-    hideKeyButton.style.display = 'inline-block';
+    hideKeyButton.hidden = false;
     copyButton.onclick = function() {
         navigator.clipboard.writeText(apiKey).then(() => {
             const copiedMessage = document.getElementById('copied');
-            copiedMessage.style.display = 'inline';
+            copiedMessage.hidden = false;
             setTimeout(() => {
-                copiedMessage.style.display = 'none';
+                copiedMessage.hidden = true;
             }, 2000);
         }).catch(err => {
             console.error('Failed to copy API Key:', err);
@@ -52,8 +52,8 @@ async function keyHandler() {
     };
     hideKeyButton.onclick = function() {
         keyOutput.textContent = '';
-        copyButton.style.display = 'none';
-        hideKeyButton.style.display = 'none';
+        copyButton.hidden = true;
+        hideKeyButton.hidden = true;
     };
 }
 async function fetchUsage() {
@@ -85,17 +85,24 @@ async function fetchUsage() {
                 resetsIn: usageData.resetsIn
             };
             
-            usageInfoDiv.innerHTML = "";
-            usageInfoDiv.innerHTML = `
-                <p><strong>API Key Name:</strong> ${usageData.name}</p>
-                <p><strong>Hourly Limit:</strong> ${usageInfo.hourlyLimit}</p>
-                <p><strong>Remaining Requests:</strong> ${usageInfo.remainingRequests}</p>
-                <p><strong>Minutes Until Reset:</strong> ${usageInfo.minutesUntilReset}</p>
-                <p><strong>Resets In:</strong> ${usageInfo.resetsIn}</p>
-            `;
+            usageInfoDiv.className = 'rd-grid rd-grid--3';
+            usageInfoDiv.innerHTML = [
+                ['API key name', usageData.name],
+                ['Hourly limit', usageInfo.hourlyLimit],
+                ['Remaining requests', usageInfo.remainingRequests],
+                ['Minutes until reset', usageInfo.minutesUntilReset],
+                ['Resets in', usageInfo.resetsIn]
+            ].map(([label, value]) => `
+                <div class="stat">
+                    <span class="stat-label">${label}</span>
+                    <span class="stat-value">${value ?? '—'}</span>
+                </div>`).join('');
         } catch (error) {
             console.error('Error fetching usage:', error);
-            alert('Failed to fetch usage information. Please try again later.');
+            const usageInfoDiv = document.getElementById('usage-info');
+            usageInfoDiv.className = '';
+            usageInfoDiv.innerHTML =
+                '<div class="alert alert-error">Failed to fetch usage information. Please try again later.</div>';
         }
     }
 }
@@ -105,17 +112,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const profileSection = document.getElementById('profile-info');
         if (username) {
             h3Element.textContent = `Welcome, ${username}!`;
-            profileSection.style.display = 'block';
+            profileSection.hidden = false;
         } else {
-            h3Element.innerHTML = `Hey there! Looks like you are not logged in. Please <a href="/auth.html">log in</a> to access your profile.`;
-            profileSection.style.display = 'none';
+            h3Element.innerHTML = `<span class="rd-empty-state">Hey there! Looks like you are not logged in. Please <a href="/auth.html">log in</a> to access your profile.</span>`;
+            profileSection.hidden = true;
         }
     });
     const generateApiKeyButton = document.getElementById('generate-api-key');
     generateApiKeyButton.addEventListener('click', function() {
         keyHandler().catch(error => {
             console.error('Error running API func', error);
-            alert('Please try again later.');
+            document.getElementById('key-output').textContent =
+                'Could not fetch your API key. Please try again later.';
         });
     });
     fetchUsage().catch(error => {

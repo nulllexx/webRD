@@ -1,37 +1,109 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f4f6f9" id="metaThemeColor">
     <title>RainDrippy - Admin Login</title>
-    <link rel="stylesheet" href="/raindrippy/index.css">
-    <link rel="stylesheet" href="/status/login.css">
     <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <script src="/js/theme.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/raindrippy/index.css">
     <link rel="stylesheet" href="/cookie.css">
     <script src="/js/events.js" defer></script>
 </head>
-<body>
-    <div id="topbar" style="background: rgb(255,255,255);">
-        <img src="/raindrippy/rd.png" alt="RainDrippy Logo" class="logo" onclick="window.location.href='/raindrippy/index'">
-        <a href="/raindrippy/profile" style="margin-left: 20px;">Profile</a>
+<body class="rd-page">
+    <div id="topbar">
+        <img src="/raindrippy/rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='/raindrippy/index'">
+        <span class="tpbar-txt">RainDrippy</span>
+        <a class="tpbar-txt" href="/raindrippy/index">Home</a>
+        <a class="tpbar-txt" href="/status/index">Status</a>
+        <a class="tpbar-txt" href="/raindrippy/docs/v1/index">API</a>
+        <a class="tpbar-txt" href="/raindrippy/profile">Profile</a>
     </div>
+
     <div id="cookie-banner">
-    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
-    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
-    <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-    <h1 style="text-align: center; margin-top: 200px;">Login to RainDrippy (administrator access)</h1>
-    <form id="loginForm" method="post" style="text-align: center;">
-        <input type="text" name="username" placeholder="Username" required style="margin: 10px; padding: 10px; width: 200px;">
-        <input type="password" name="password" placeholder="Password" required style="margin: 10px; padding: 10px; width: 200px;">
-        <button type="submit" style="padding: 10px 20px;">Login</button>
-        <p style="margin-top: 20px; font-size: large;">Don't have an account? <a href="mailto:raindrippy.contact@protonmail.com">Contact us</a> to request access.</p>
-    </form>
-    <p id="loginStatus" style="text-align:center; color:red; margin-top:10px;"></p>
-    <p style="text-align: center;">Or, alternatively, use the <a href="/login.html">Login Page</a>.</p>
-    <p style="text-align: center; margin-top: 100px;">Didn't mean to get here? <a href="/raindrippy/index.html">Click here</a> to go back.</p>
-    <script src="login.js"></script>
+        <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+        <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+        <button id="cookie-ok">OK</button>
+    </div>
+    <script src="/js/cookies.js"></script>
+
+    <main id="content" class="container--narrow">
+        <div class="card rd-auth-card">
+            <h1 class="rd-auth-title">Administrator login</h1>
+            <p class="rd-section-lede">Sign in with an administrator account to reach the RainDrippy admin dashboard.</p>
+
+            <form id="loginForm" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary rd-auth-submit">Log in</button>
+            </form>
+
+            <p id="loginStatus" class="alert" hidden></p>
+
+            <div class="rd-auth-foot">
+                <p>No account yet? <a href="mailto:raindrippy.contact@protonmail.com">Contact us</a> to request access.</p>
+                <p>Or use the main <a href="/login.html">login page</a>.</p>
+            </div>
+        </div>
+
+        <p class="rd-center rd-muted rd-auth-escape">Did not mean to end up here? <a href="/raindrippy/index">Go back to the home page</a>.</p>
+    </main>
+
+    <footer class="rd-footer">
+        <div class="rd-footer-inner">
+            <div class="rd-footer-brand">
+                <img src="/raindrippy/rd.png" alt="">
+                <strong>RainDrippy</strong>
+                <p>Games and general-usage software, plus the services that keep them running.</p>
+            </div>
+            <div class="rd-footer-cols">
+                <div>
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/raindrippy/index#projects">All projects</a></li>
+                        <li><a href="/raindrippy/index#solutions">ddosprot</a></li>
+                        <li><a href="https://bakosmp.go.ro/">BakoSMP</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="/raindrippy/docs/v1/index">API docs</a></li>
+                        <li><a href="/raindrippy/profile">Profile &amp; API key</a></li>
+                        <li><a href="/status/index">Service status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/DMx3m54waD" rel="noopener">Discord</a></li>
+                        <li><a href="mailto:raindrippy.contact@protonmail.com">Contact us</a></li>
+                        <li><a href="/raindrippy/privacy-policy">Privacy policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rd-footer-legal">
+            <span>&copy; 2026 RainDrippy</span>
+            <span>&middot;</span>
+            <span>Licensed under GPLv3</span>
+            <span>&middot;</span>
+            <a href="/raindrippy/privacy-policy">Privacy policy</a>
+        </div>
+    </footer>
+
     <script src="/js/topbar-show.js"></script>
+    <script src="/raindrippy/login.js"></script>
     <script src="/js/genFP.js"></script>
 </body>
 </html>

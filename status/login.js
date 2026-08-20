@@ -1,6 +1,14 @@
 const form = document.getElementById('loginForm');
 const statusP = document.getElementById('loginStatus');
 
+// #loginStatus is an .alert element now - tone comes from a class, not an
+// inline colour, so it follows the light/dark theme.
+function setStatus(message, tone) {
+    statusP.textContent = message || '';
+    statusP.className = message ? 'alert alert-' + (tone || 'error') : 'alert';
+    statusP.hidden = !message;
+}
+
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -22,27 +30,21 @@ form.addEventListener('submit', async (e) => {
 
         if (res.ok) {
             if (data.isAdmin) window.location.href = '/status/dashboard.html'; else { 
-                statusP.style.color = 'red';
-                statusP.textContent = 'You logged in as a regular user!';
-                setTimeout(() => { statusP.textContent = ''; }, 3000);
+                setStatus('You logged in as a regular user!', 'error');
+                setTimeout(() => setStatus(''), 3000);
             }
         } else if (res.status === 401) {
-            statusP.style.color = 'red';
-            statusP.textContent = data.error || 'Invalid username or password.';
-            setTimeout(() => { statusP.textContent = ''; }, 3000);
+            setStatus(data.error || 'Invalid username or password.', 'error');
+            setTimeout(() => setStatus(''), 3000);
         } else if (res.status === 403) {
-            statusP.style.color = 'orange';
-            statusP.textContent = data.error || 'Access denied: Admins only.';
+            setStatus(data.error || 'Access denied: Admins only.', 'warn');
         } else if (res.status === 400) {
-            statusP.style.color = 'orange';
-            statusP.textContent = 'Please fill in all fields.';
+            setStatus('Please fill in all fields.', 'warn');
         } else {
-            statusP.style.color = 'red';
-            statusP.textContent = 'Something went wrong. Try again later.';
+            setStatus('Something went wrong. Try again later.', 'error');
         }
     } catch (err) {
-        statusP.style.color = 'red';
-        statusP.textContent = 'Network error. Check your connection.';
+        setStatus('Network error. Check your connection.', 'error');
         console.error(err);
     }
 });

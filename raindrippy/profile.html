@@ -1,74 +1,121 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f4f6f9" id="metaThemeColor">
     <title>RainDrippy - Your Profile</title>
-    <link rel="stylesheet" href="/raindrippy/index.css">
     <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <script src="/js/theme.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/raindrippy/index.css">
     <link rel="stylesheet" href="/cookie.css">
-    <style>
-        h3 {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #2c3e50;
-        }
-        #profile-info {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #ecf0f1;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        button {
-            background-color: #2980b9;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            }
-            button:hover {
-            background-color: #1abc9c;
-        }
-    </style>
-    <script src="/js/events.js" defer></script>  
+    <script src="/js/events.js" defer></script>
 </head>
-<body>
+<body class="rd-page">
     <div id="topbar">
         <img src="/raindrippy/rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='/raindrippy/index'">
-        <span class="tpbar-txt" style="margin-left: 20px;">RainDrippy</span>
-        <a class="tpbar-txt" href="/raindrippy/profile" style="margin-left: 2em;">Profile</a>
+        <span class="tpbar-txt">RainDrippy</span>
+        <a class="tpbar-txt" href="/raindrippy/index">Home</a>
+        <a class="tpbar-txt" href="/status/index">Status</a>
+        <a class="tpbar-txt" href="/raindrippy/docs/v1/index">API</a>
+        <a class="tpbar-txt" href="/raindrippy/profile" aria-current="page">Profile</a>
     </div>
+
     <div id="cookie-banner">
-    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
-    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
-    <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-    <div id="content">
-        <h3 id="welcome-text" style="text-align: center;"></h3>
-        <div id="profile-info" style="display: none;">
-            <h2 style="text-align: center;">Profile Information</h2>
-            <p style="text-align: center;">Here you can view information about your account, and also generate/view your API key.</p>
-            <div id="api-key-section" style="text-align: center;">
-                <h3>Your API Key</h3>
-                <p>Press the button below to fetch your API key.</p>
-                <button id="generate-api-key" class="btn">Fetch API Key</button><br><br>
-                <code id="key-output" style="margin-top: 4em;"></code><br><br>
-                <button id="copy-api-key" class="btn" style="display: none; margin-top: 10px;">Copy API Key</button><button id="hide-key" style="display: none; margin-left: 20px;">Hide API Key</button><br><br>
-                <p id="copied" style="display: none;">Copied!</p><br>
-                <hr>
-                <h3>Usage</h3>
-                <p>Use the API key to access our <a href="/raindrippy/api_docs">Public API</a>. Keep it secure and do not share it publicly.</p>
-                <p>Below is your usage information:</p>
-                <button id="fetch-usage">Get usage</button>
-                <div id="usage-info" style="margin-top: 20px;"></div>
+        <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+        <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+        <button id="cookie-ok">OK</button>
+    </div>
+    <script src="/js/cookies.js"></script>
+
+    <main id="content">
+        <header class="rd-section">
+            <h1 id="welcome-text"></h1>
+        </header>
+
+        <div id="profile-info" hidden>
+            <div class="card">
+                <h2 class="card-title">Your API key</h2>
+                <p class="rd-section-lede">Your key authenticates every call to the RainDrippy Public API. Keep it secret &mdash; anyone holding it can spend your hourly quota.</p>
+
+                <div class="rd-hero-actions rd-actions-start">
+                    <button type="button" id="generate-api-key" class="btn btn-primary">
+                        <i class="fa-solid fa-key" aria-hidden="true"></i> Fetch API key
+                    </button>
+                    <button type="button" id="copy-api-key" class="btn btn-outline" hidden>
+                        <i class="fa-regular fa-copy" aria-hidden="true"></i> Copy
+                    </button>
+                    <button type="button" id="hide-key" class="btn btn-outline" hidden>
+                        <i class="fa-regular fa-eye-slash" aria-hidden="true"></i> Hide
+                    </button>
+                </div>
+
+                <code id="key-output" class="rd-code rd-key-output"></code>
+                <p id="copied" class="rd-muted" hidden>Copied to your clipboard.</p>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Usage</h2>
+                <p class="rd-section-lede">Every key is limited to 100 requests per hour. Read the <a href="/raindrippy/docs/v1/index">API documentation</a> for the full endpoint list.</p>
+
+                <button type="button" id="fetch-usage" class="btn btn-outline">
+                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Get usage
+                </button>
+
+                <div id="usage-info" class="rd-mt"></div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <footer class="rd-footer">
+        <div class="rd-footer-inner">
+            <div class="rd-footer-brand">
+                <img src="/raindrippy/rd.png" alt="">
+                <strong>RainDrippy</strong>
+                <p>Games and general-usage software, plus the services that keep them running.</p>
+            </div>
+            <div class="rd-footer-cols">
+                <div>
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/raindrippy/index#projects">All projects</a></li>
+                        <li><a href="/raindrippy/index#solutions">ddosprot</a></li>
+                        <li><a href="https://bakosmp.go.ro/">BakoSMP</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="/raindrippy/docs/v1/index">API docs</a></li>
+                        <li><a href="/raindrippy/profile">Profile &amp; API key</a></li>
+                        <li><a href="/status/index">Service status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/DMx3m54waD" rel="noopener">Discord</a></li>
+                        <li><a href="mailto:raindrippy.contact@protonmail.com">Contact us</a></li>
+                        <li><a href="/raindrippy/privacy-policy">Privacy policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rd-footer-legal">
+            <span>&copy; 2026 RainDrippy</span>
+            <span>&middot;</span>
+            <span>Licensed under GPLv3</span>
+            <span>&middot;</span>
+            <a href="/raindrippy/privacy-policy">Privacy policy</a>
+        </div>
+    </footer>
+
     <script src="/js/topbar-show.js"></script>
-    <script src ="profile.js"></script>
+    <script src="/raindrippy/profile.js"></script>
     <script src="/js/genFP.js"></script>
 </body>
 </html>

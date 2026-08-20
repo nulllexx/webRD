@@ -17,6 +17,13 @@ function generateDeviceFingerprint() {
     canvas.style.display = 'none';
     return btoa(fingerprint).substring(0, 32);
 }
+function esc(value) {
+    // Moderator notes and evidence are operator-supplied text, not markup.
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+}
+
 function logout() {
     fetch('https://bakosmp.go.ro/api/purge-logout', {
           method: 'POST',
@@ -79,28 +86,29 @@ async function loadBanInfo() {
     const container = document.getElementById("ban-container");
     container.innerHTML = `
     <div class="ban-card">
-        <div class="ban-header"><strong>${headerText}</strong></div>
-        <p class="ban-info" style="color: white;">We've determined that your prior actions have been against our rules & have taken action against your account.</p>
-        <p class="ban-info" style="color: white;"><strong>Reviewed:</strong> ${data.banInfo.moderatedTimePDT} (PDT)</p>
-        <p class="ban-info" style="color: white;"><strong>Moderator Note:</strong> ${data.banInfo.modNote}</p>
+        <div class="ban-header">${headerText}</div>
+        <p class="ban-info">We have determined that your prior actions have been against our rules, and have taken action against your account.</p>
+        <p class="ban-info"><strong>Reviewed:</strong> ${esc(data.banInfo.moderatedTimePDT)} (PDT)</p>
+        <p class="ban-info"><strong>Moderator note:</strong> ${esc(data.banInfo.modNote)}</p>
         ${data.banInfo.incriminatory && data.banInfo.incriminatory.length > 0 ? `
-        <div class="offending" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-            <strong style="font-size: large; margin-left: 5%;">Offending Content:</strong><br>
+        <div class="offending">
+            <strong>Offending content</strong><br>
             ${data.banInfo.incriminatory.map(inc => {
             const content = inc.offending?.content || inc.content || '[No content]';
-            return `${inc.reason || 'Unknown reason'} →     "${content}"`;
+            return `${esc(inc.reason || 'Unknown reason')} &rarr; "${esc(content)}"`;
             }).join("<br>")}
         </div>
         ` : ""}
-        <p class="warning" style="color: white;">${banText}</p>
-        <div id="button-container" style="text-align: center;">
-            <button onclick="logout()">Logout</button>
+        <p class="warning">${banText}</p>
+        <div id="button-container">
+            <button type="button" class="btn btn-primary" onclick="logout()">Logout</button>
         </div>
     </div>
     `;
     } catch (err) {
     console.error("Failed to load ban info", err);
-    document.getElementById("ban-container").innerHTML = "<p>Error loading moderation details.</p>";
+    document.getElementById("ban-container").innerHTML =
+        '<div class="alert alert-error">Error loading moderation details.</div>';
     }
 }
 

@@ -1,135 +1,153 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
-}
+/* Public status page.
+   Loads AFTER raindrippy/index.css, whose rules are :where()-scoped and
+   therefore have zero specificity - so plain selectors here win without needing
+   !important. Everything colour-related is driven by the [data-impact] /
+   [data-status] attributes that status/index.js sets, so the palette follows
+   the light/dark theme instead of being baked into inline styles. */
 
-.logo {
-    transition: transform 0.3s ease, filter 0.3s ease;
-    cursor: pointer;
-}
-.logo:hover {
-    transform: scale(1.1);
-    filter: brightness(75%);
-}
-h3, h2, h1, h5 {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+/* ------------------------------------------------------------- overview --- */
 
-/* overview */
 #overview-status {
     display: flex;
+    align-items: center;
     justify-content: center;
-    margin: auto auto 0 auto;
-    width: 50%;
-    border-radius: 10px;
-    padding: 16px;
+    gap: 12px;
+    max-width: 720px;
+    margin: 0 auto 48px;
+    padding: 20px 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* components list (full-status) */
+#overview-title {
+    margin: 0;
+    font-size: 1.25rem;
+    color: inherit;
+}
+
+#overview-status[data-impact="minimal_outage"] { background: var(--ok-soft);     border-color: var(--ok);     color: var(--ok); }
+#overview-status[data-impact="partial_outage"] { background: var(--warn-soft);   border-color: var(--warn);   color: var(--warn); }
+#overview-status[data-impact="full_outage"]    { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+#overview-status[data-impact="unknown"]        { background: var(--bg-raised);   border-color: var(--line);   color: var(--text-muted); }
+
+/* ---------------------------------------------------------- components --- */
+
 #full-status {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    justify-content: center;
-    margin: 100px auto 0 auto;
-    width: 50%;
-    border: rgba(0, 0, 0, 0.15) 1px solid;
-    border-radius: 10px;
-    padding: 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-panel);
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
+
+#full-status:empty { display: none; }
+
 .component-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 16px;
-    width: 100%;
-    box-sizing: border-box;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line-soft);
 }
+
+.component-row:last-child { border-bottom: none; }
+
+.component-name { font-weight: 500; }
+
 .status-badge {
-    padding: 3px 8px;
-    border-radius: 4px;
-    color: white;
-    min-width: 120px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    min-width: 140px;
     text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--text-muted);
+    flex-shrink: 0;
 }
 
-/* current incident */
-#current-incident {
-    width: 50%;
-    margin: 12px auto 0 auto;
-    box-sizing: border-box;
-}
+.status-badge[data-status="operational"] { background: var(--ok-soft);     color: var(--ok);     border-color: var(--ok); }
+.status-badge[data-status="degraded"]    { background: var(--warn-soft);   color: var(--warn);   border-color: var(--warn); }
+.status-badge[data-status="disruption"]  { background: var(--danger-soft); color: var(--danger); border-color: var(--danger); }
 
-/* incident history */
-#incident-history {
-    width: 50%;
-    margin: 12px auto 40px auto;
-    box-sizing: border-box;
-}
+/* ----------------------------------------------------------- incidents --- */
 
-/* FIXED: Incident card styles */
+#current-incident:empty { display: none; }
+#current-incident { margin-bottom: 48px; }
+
 .incident-card {
-    margin-bottom: 24px;
-    border: 1px solid rgba(0,0,0,0.15);
-    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--line);
+    border-radius: var(--radius);
     overflow: hidden;
-    background: white;
+    background: var(--bg-panel);
+    box-shadow: var(--shadow);
 }
+
+.incident-card:last-child { margin-bottom: 0; }
+
+.incident-card[data-impact="minimal_outage"] { border-left-color: var(--ok); }
+.incident-card[data-impact="partial_outage"] { border-left-color: var(--warn); }
+.incident-card[data-impact="full_outage"]    { border-left-color: var(--danger); }
 
 .incident-topbar {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    box-sizing: border-box;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line-soft);
+    background: var(--bg-raised);
 }
 
 .incident-topbar-title {
-    color: white;
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    color: var(--text);
 }
 
 .incident-topbar-date {
-    color: white;
-    font-size: 0.95rem;
-    opacity: 0.9;
+    font-size: 0.85rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    color: var(--text-muted);
 }
 
-/* FIXED: Incident update styles */
+.incident-card[data-impact="minimal_outage"] .incident-topbar-title { color: var(--ok); }
+.incident-card[data-impact="partial_outage"] .incident-topbar-title { color: var(--warn); }
+.incident-card[data-impact="full_outage"]    .incident-topbar-title { color: var(--danger); }
+
 .incident-update {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line-soft);
 }
 
-.incident-update:last-child {
-    border-bottom: none;
-}
+.incident-update:last-child { border-bottom: none; }
 
 .incident-update-time {
-    margin: 0 0 8px 10px; /* Added 10px left margin */
-    font-weight: 500;
-    font-size: 0.9rem;
-    color: #333;
+    margin: 0 0 6px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    color: var(--text-muted);
 }
 
 .incident-update-text {
-    margin: 0 0 0 10px; /* Added 10px left margin */
-    line-height: 1.4;
-    color: #555;
+    margin: 0;
+    line-height: 1.55;
+    color: var(--text);
 }
-/* Topbar styles */
-#topbar {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+@media (max-width: 720px) {
+    #overview-status { flex-direction: column; text-align: center; gap: 8px; }
+    .component-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .status-badge { min-width: 0; }
 }

@@ -1,118 +1,284 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f4f6f9" id="metaThemeColor">
     <title>RainDrippy - Home</title>
-    <link rel="stylesheet" href="/raindrippy/index.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <link rel="icon" type="image/png" href="/raindrippy/rd.png">
+    <script src="/js/theme.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/raindrippy/index.css">
     <link rel="stylesheet" href="/cookie.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/c.min.js"></script>
     <script src="/js/events.js" defer></script>
 </head>
-<body>
+<body class="rd-page">
     <div id="topbar">
         <img src="/raindrippy/rd.png" alt="RainDrippy" class="logo" onclick="window.location.href='/raindrippy/index'">
-        <span class="tpbar-txt" style="margin-left: 20px;">RainDrippy</span>
-        <a class="tpbar-txt" href="/raindrippy/profile" style="margin-left: 2em;">Profile</a>
+        <span class="tpbar-txt">RainDrippy</span>
+        <a class="tpbar-txt" href="/raindrippy/index" aria-current="page">Home</a>
+        <a class="tpbar-txt" href="/status/index">Status</a>
+        <a class="tpbar-txt" href="/raindrippy/docs/v1/index">API</a>
+        <a class="tpbar-txt" href="/raindrippy/profile">Profile</a>
     </div>
+
     <div id="cookie-banner">
-    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
-    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
-    <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-    <div id="content">
-        <div id="toc">
-            <h2>Table of Contents</h2>
-            <ul>
-                <div class="centered">
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#solutions">Solutions</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </div>
-            </ul>
-        </div>
-        <section id="about" style="margin-top: 125px;">
-            <h1 style="text-align: center;">About</h1>
-            <p style="text-align: center;">Welcome to RainDrippy! We're working on diverse softwares, such as games, or general usage software.</p>
-            <p style="text-align: center;">Our goal is to create innovative and engaging software solutions that enhance user experience and bring joy to our users.</p>
-            <p style="text-align: center;">This is our official website, where you can see what we're working on & available solutions.</p>
-        </section>
-        <section id="projects" style="margin-top: 125px;">
-            <h1 style="text-align: center;">*Projects</h1>
-            <p style="text-align: center;">We are currently working on several exciting projects, including:</p>
-            <ul style="text-align: center;">
-                <li>PvSurvCraft - an immersive, realistic multiplayer & singleplayer survival-story game.</li>
-                <li>RainDrippy Launcher - A launcher for our games and software.</li>
-                <li>RainDrippy Solutions - A collection of software solutions for various needs.</li>
-            </ul>
-            <p style="text-align: center;">Stay tuned for updates on these projects!</p>
-            <p style="text-align: center;">* - This section is in beta. Expect a redesign coming soon.</p>
-        </section>
-        <section id="solutions" style="margin-top: 125px;">
-            <h1 style="text-align: center;">Solutions</h1>
-            <p style="text-align: center;">We're working on general, free-to-use, open-source solutions for everybody. Here's a list of what we have to offer:</p>
-            <ol type="1" style="text-align: center;">
-                <li><b><i>ddosprot</i></b><div class="centered"><p>A general-purpose Linux & Windows tool made to protect servers from DoS / DDoS attacks.</p>
-                    <h2 style="margin-top: 20px;">How it works:</h2>
-                    <p>ddosprot uses <code>libpcap</code> to monitor incoming traffic on your selected protected ports, and blocks suspicious activity. Inspired by fail2ban, the system uses firewall blocking to discard requests from suspicious IPs.</p>
-                    <h2 style="margin-top: 20px;">Features:</h2>
-                    <ul>
-                        <li>Real-time traffic monitoring</li>
-                        <li>Automatic IP blocking</li>
-                        <li>Customizable protection settings</li>
-                        <li>Daemon setup</li>
-                        <li>CLI & conf configuration</li>
-                        <li>Cross-platform support (Linux & Windows)</li>
-                    </ul>
-                    <h2 style="margin-top: 20px;">Installation:</h2>
-                    <p>To install ddosprot, download the <a href="sol_content/ddosprot.zip" style="text-decoration: none;">zip</a> and extract it.</p>
-                    <p>On Linux, open the Terminal in the extracted folder, and run <code>makepkg -si</code>. On Windows, open PowerShell in the extracted folder, and build the C file with <code>gcc -O2 -Wall -o ddosprot.exe ddosprot.c -I "(path to Npcap SDK)/Include" -I "(path to Npcap SDK)/Lib" -lwpcap -lPacket -lws2_32</code>.</p>
-                    <h2 style="margin-top: 20px;">Source viewer</h2>
-                    <p>Below is the full C code of ddosprot, right in your browser, without needing to download anything.</p>
-                    <div class="code-viewer" id="codeViewer">
-                        <button class="toggle-btn" id="toggleBtn" aria-label="Minimize code block">&#9650;</button>
-                        <pre><code class="language-c" id="code-block" style="text-align: left;"></code></pre>
-                    </div>
-                    <script>
-                        fetch('sol_content/viewer/ddosprot.txt')
-                        .then(response => response.text())
-                        .then(code => {
-                            const codeBlock = document.getElementById('code-block');
-                            codeBlock.textContent = code;
-                            hljs.highlightElement(codeBlock);
-                        });
-                        const codeViewer = document.getElementById('codeViewer');
-                        const toggleBtn = document.getElementById('toggleBtn');
-
-                        toggleBtn.addEventListener('click', () => {
-                        const isMinimized = codeViewer.classList.toggle('minimized');
-
-                        if (isMinimized) {
-                            toggleBtn.innerHTML = '&#9660;'; // Down arrow
-                            toggleBtn.setAttribute('aria-label', 'Maximize code block');
-                        } else {
-                            toggleBtn.innerHTML = '&#9650;'; // Up arrow
-                            toggleBtn.setAttribute('aria-label', 'Minimize code block');
-                        }
-                        });
-                    </script>
-                </div></li>
-            </ol>
-            <p style="text-align: center;">Explore our solutions to find the right fit for you!</p>
-        </section>
-        <section id="contact" style="margin-top: 125px;">
-            <h1 style="text-align: center;">Contact</h1>
-            <p style="text-align: center;">To contact us, please use the following methods (updated regularly):</p>
-            <ul style="text-align: center;">
-                <li>Email: <a href="mailto:raindrippy.contact@protonmail.com">click</a></li>
-            </ul>
-        </section>
+        <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+        <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+        <button id="cookie-ok">OK</button>
     </div>
-    <script src="/js/genFP.js"></script>
+    <script src="/js/cookies.js"></script>
+
+    <header class="rd-hero">
+        <img src="/raindrippy/rd.png" alt="" class="logo rd-hero-mark">
+        <h1 class="rd-hero-title">RainDrippy</h1>
+        <p class="rd-hero-sub">We build diverse software &mdash; games, and general-usage tools. This is our official site, where you can see what we are working on and what is available to use today.</p>
+
+        <div class="rd-hero-actions">
+            <a class="btn btn-primary" href="#projects"><i class="fa-solid fa-cubes" aria-hidden="true"></i> Explore projects</a>
+            <a class="btn btn-outline" href="/raindrippy/docs/v1/index"><i class="fa-solid fa-code" aria-hidden="true"></i> Public API</a>
+            <a class="btn btn-outline" href="https://discord.gg/DMx3m54waD" rel="noopener"><i class="fa-brands fa-discord" aria-hidden="true"></i> Discord</a>
+        </div>
+
+        <a class="rd-pill" id="rd-status-pill" href="/status/index" data-impact="unknown">
+            <span class="rd-dot" aria-hidden="true"></span>
+            <span id="rd-status-text">Checking status&hellip;</span>
+        </a>
+    </header>
+
+    <nav class="rd-subnav" aria-label="Page sections">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#platform">Platform</a>
+        <a href="#solutions">Solutions</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <main id="content">
+        <section id="about" class="rd-section">
+            <h2 class="rd-section-title">About</h2>
+            <p class="rd-section-lede">Welcome to RainDrippy.</p>
+            <div class="rd-grid rd-grid--2">
+                <div class="card">
+                    <h3>What we make</h3>
+                    <p>We work on diverse software, such as games, or general usage software &mdash; from a survival-story game to open-source server tooling anyone can run.</p>
+                </div>
+                <div class="card">
+                    <h3>Why we make it</h3>
+                    <p>Our goal is to create innovative and engaging software solutions that enhance user experience and bring joy to our users.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="rd-section">
+            <h2 class="rd-section-title">Projects</h2>
+            <p class="rd-section-lede">What we are building right now, and what you can already download.</p>
+
+            <div class="rd-grid rd-grid--2">
+                <article class="rd-project-card">
+                    <div class="rd-card-body">
+                        <div class="rd-card-head">
+                            <h3>PvSurvCraft</h3>
+                            <span class="badge badge-warn">In development</span>
+                        </div>
+                        <p>An immersive, realistic multiplayer &amp; singleplayer survival-story game.</p>
+                    </div>
+                    <div class="rd-card-meta"><span>Not yet released &mdash; watch this space.</span></div>
+                </article>
+
+                <article class="rd-project-card">
+                    <div class="rd-card-body">
+                        <div class="rd-card-head">
+                            <h3>RainDrippy Launcher</h3>
+                            <span class="badge badge-ok">Available</span>
+                        </div>
+                        <p>A launcher for our games and software, so installs and updates stay in one place.</p>
+                    </div>
+                    <div class="rd-card-meta">
+                        <a class="btn btn-outline btn-sm" href="/content/raindrippy/launcher/RDLauncher.exe">
+                            <i class="fa-solid fa-download" aria-hidden="true"></i> Download for Windows
+                        </a>
+                        <a href="/content/raindrippy/launcher/RDLauncher.sha256sum">SHA-256</a>
+                    </div>
+                </article>
+
+                <article class="rd-project-card">
+                    <div class="rd-card-body">
+                        <img src="/games/Mouse_Maze/icon.png" alt="" class="rd-card-media">
+                        <div class="rd-card-head">
+                            <h3>Mouse Maze</h3>
+                            <span class="badge badge-accent">v1.3</span>
+                        </div>
+                        <p>A re-make of the original Tom &amp; Jerry: Mouse Maze game.</p>
+                    </div>
+                    <div class="rd-card-meta">
+                        <a class="btn btn-outline btn-sm" href="/games/Mouse_Maze/MouseMaze_v1.3.zip">
+                            <i class="fa-solid fa-download" aria-hidden="true"></i> Download
+                        </a>
+                    </div>
+                </article>
+
+                <article class="rd-project-card">
+                    <div class="rd-card-body">
+                        <div class="rd-card-head">
+                            <h3>RainDrippy Solutions</h3>
+                            <span class="badge badge-accent">Open source</span>
+                        </div>
+                        <p>A collection of free, open-source software solutions for various needs.</p>
+                    </div>
+                    <div class="rd-card-meta"><a href="#solutions">See what is available &rarr;</a></div>
+                </article>
+            </div>
+        </section>
+
+        <section id="platform" class="rd-section">
+            <h2 class="rd-section-title">Platform</h2>
+            <p class="rd-section-lede">The services running behind our projects &mdash; all of them open to you with an account.</p>
+
+            <div class="rd-grid rd-grid--2">
+                <a class="rd-link-card" href="/raindrippy/docs/v1/index">
+                    <i class="fa-solid fa-code rd-card-icon" aria-hidden="true"></i>
+                    <h3>Public API</h3>
+                    <p>Query player counts, hashes and files from your own applications. Authenticate with an <code>X-API-KEY</code> header; 100 requests per hour.</p>
+                </a>
+
+                <a class="rd-link-card" href="/raindrippy/profile">
+                    <i class="fa-solid fa-key rd-card-icon" aria-hidden="true"></i>
+                    <h3>Profile &amp; API key</h3>
+                    <p>Generate your API key and keep an eye on your hourly usage and reset window.</p>
+                </a>
+
+                <a class="rd-link-card" href="/status/index">
+                    <i class="fa-solid fa-wave-square rd-card-icon" aria-hidden="true"></i>
+                    <h3>Service status</h3>
+                    <p>Live component health plus the full history of every incident we have had.</p>
+                </a>
+
+                <a class="rd-link-card" href="https://bakosmp.go.ro/" rel="noopener">
+                    <i class="fa-solid fa-cube rd-card-icon" aria-hidden="true"></i>
+                    <h3>BakoSMP</h3>
+                    <p>Our Minecraft survival server, now on Season 8. A brand-new world every 2&ndash;3 months, custom skins, world downloads, and full cracked-client support on Java Edition.</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="solutions" class="rd-section">
+            <h2 class="rd-section-title">Solutions</h2>
+            <p class="rd-section-lede">General, free-to-use, open-source solutions for everybody. Here is what we have to offer.</p>
+
+            <div class="card">
+                <div class="rd-card-head">
+                    <h3>ddosprot</h3>
+                    <span class="badge badge-accent">Linux &amp; Windows</span>
+                </div>
+                <p>A general-purpose Linux &amp; Windows tool made to protect servers from DoS / DDoS attacks.</p>
+
+                <h4>How it works</h4>
+                <p>ddosprot uses <code>libpcap</code> to monitor incoming traffic on your selected protected ports, and blocks suspicious activity. Inspired by fail2ban, the system uses firewall blocking to discard requests from suspicious IPs.</p>
+
+                <h4>Features</h4>
+                <ul class="rd-feature-list">
+                    <li>Real-time traffic monitoring</li>
+                    <li>Automatic IP blocking</li>
+                    <li>Customizable protection settings</li>
+                    <li>Daemon setup</li>
+                    <li>CLI &amp; conf configuration</li>
+                    <li>Cross-platform support (Linux &amp; Windows)</li>
+                </ul>
+
+                <h4>Installation</h4>
+                <p>Download the <a href="sol_content/ddosprot.zip">zip</a> and extract it.</p>
+                <p class="rd-muted">On Linux, open a terminal in the extracted folder and run:</p>
+                <code class="rd-code">makepkg -si</code>
+                <p class="rd-muted">On Windows, open PowerShell in the extracted folder and build the C file with:</p>
+                <code class="rd-code">gcc -O2 -Wall -o ddosprot.exe ddosprot.c -I "(path to Npcap SDK)/Include" -I "(path to Npcap SDK)/Lib" -lwpcap -lPacket -lws2_32</code>
+
+                <h4>Source viewer</h4>
+                <p>Below is the full C source of ddosprot, right in your browser, with nothing to download.</p>
+                <div class="code-viewer" id="codeViewer">
+                    <button class="toggle-btn" type="button" id="toggleBtn" aria-label="Minimize code block" aria-expanded="true">&#9650;</button>
+                    <pre><code class="language-c" id="code-block"></code></pre>
+                </div>
+            </div>
+
+            <p class="rd-muted">Explore our solutions to find the right fit for you.</p>
+        </section>
+
+        <section id="contact" class="rd-section">
+            <h2 class="rd-section-title">Contact</h2>
+            <p class="rd-section-lede">Get in touch &mdash; these are kept up to date.</p>
+
+            <div class="rd-grid rd-grid--3">
+                <a class="rd-link-card" href="mailto:raindrippy.contact@protonmail.com">
+                    <i class="fa-regular fa-envelope rd-card-icon" aria-hidden="true"></i>
+                    <h3>Email</h3>
+                    <p>raindrippy.contact@protonmail.com</p>
+                </a>
+                <a class="rd-link-card" href="https://discord.gg/DMx3m54waD" rel="noopener">
+                    <i class="fa-brands fa-discord rd-card-icon" aria-hidden="true"></i>
+                    <h3>Discord</h3>
+                    <p>Join the community server for support and announcements.</p>
+                </a>
+                <a class="rd-link-card" href="/raindrippy/privacy-policy">
+                    <i class="fa-solid fa-shield-halved rd-card-icon" aria-hidden="true"></i>
+                    <h3>Privacy</h3>
+                    <p>How we handle your data, and the rights you have over it.</p>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="rd-footer">
+        <div class="rd-footer-inner">
+            <div class="rd-footer-brand">
+                <img src="/raindrippy/rd.png" alt="">
+                <strong>RainDrippy</strong>
+                <p>Games and general-usage software, plus the services that keep them running.</p>
+            </div>
+            <div class="rd-footer-cols">
+                <div>
+                    <h4>Projects</h4>
+                    <ul>
+                        <li><a href="/raindrippy/index#projects">All projects</a></li>
+                        <li><a href="/raindrippy/index#solutions">ddosprot</a></li>
+                        <li><a href="https://bakosmp.go.ro/">BakoSMP</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="/raindrippy/docs/v1/index">API docs</a></li>
+                        <li><a href="/raindrippy/profile">Profile &amp; API key</a></li>
+                        <li><a href="/status/index">Service status</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="https://discord.gg/DMx3m54waD" rel="noopener">Discord</a></li>
+                        <li><a href="mailto:raindrippy.contact@protonmail.com">Contact us</a></li>
+                        <li><a href="/raindrippy/privacy-policy">Privacy policy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="rd-footer-legal">
+            <span>&copy; 2026 RainDrippy</span>
+            <span>&middot;</span>
+            <span>Licensed under GPLv3</span>
+            <span>&middot;</span>
+            <a href="/raindrippy/privacy-policy">Privacy policy</a>
+        </div>
+    </footer>
+
     <script src="/js/topbar-show.js"></script>
+    <script src="/raindrippy/home.js"></script>
+    <script src="/js/genFP.js"></script>
 </body>
 </html>

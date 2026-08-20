@@ -1,98 +1,35 @@
+/* Bridge: the legacy docs variable names now resolve to the shared RainDrippy
+   tokens defined in raindrippy/index.css. var() indirection resolves at USE
+   time, so when html[data-theme="dark"] redefines --accent/--text/--bg on the
+   same element, every alias below re-resolves with it and the whole docs site
+   themes for free.
+
+   Do NOT re-add --text-muted here: it collides with a shared token, and this
+   sheet loads AFTER index.css, so a local value would win and stay a fixed
+   grey in dark mode. */
 :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #1abc9c;
-            --text-color: #2c3e50;
-            --text-muted: #7f8c8d;
-            --bg-color: #ffffff;
-            --code-bg: #f8f9fa;
-            --border-color: #e9ecef;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --error-color: #e74c3c;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            scroll-behavior: smooth;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
-            z-index: 1000;
-            box-shadow: 0 2px 10px var(--shadow-color);
-            transition: transform 0.3s ease;
-        }
-
-        .header.hidden {
-            transform: translateY(-100%);
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.1);
-        }
-
-        .brand {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-left: 1rem;
-            color: white;
-            text-decoration: none;
-        }
-
-        .nav-links {
-            margin-left: auto;
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-color);
-        }
+    --primary-color:   var(--text);
+    --secondary-color: var(--accent);
+    --accent-color:    var(--accent-dim);
+    --text-color:      var(--text);
+    --bg-color:        var(--bg);
+    --code-bg:         var(--bg-input);
+    --border-color:    var(--line);
+    --shadow-color:    rgba(0, 0, 0, 0.10);
+    --success-color:   var(--ok);
+    --warning-color:   var(--warn);
+    --error-color:     var(--danger);
+}
 
         /* Main Content */
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 6rem 2rem 2rem;
+            padding: 2rem;
+            /* body is a column flex container - grow so the footer sits at the
+               bottom on short pages */
+            flex: 1 0 auto;
+            width: 100%;
         }
 
         .hero {
@@ -133,7 +70,7 @@
         }
 
         .quick-nav-links a {
-            background: white;
+            background: var(--bg-raised);
             padding: 0.5rem 1rem;
             border-radius: 6px;
             text-decoration: none;
@@ -143,8 +80,8 @@
         }
 
         .quick-nav-links a:hover {
-            background: var(--secondary-color);
-            color: white;
+            background: var(--accent);
+            color: var(--accent-contrast);
             transform: translateY(-1px);
         }
 
@@ -169,7 +106,7 @@
         .subsection {
             margin: 2rem 0;
             padding: 1.5rem;
-            background: #fafbfc;
+            background: var(--bg-raised);
             border-radius: 8px;
             border-left: 4px solid var(--secondary-color);
         }
@@ -208,29 +145,29 @@
         }
 
         .method.get {
-            background: #d4edda;
-            color: #155724;
+            background: var(--ok-soft);
+            color: var(--ok);
         }
 
         .method.post {
-            background: #fff3cd;
-            color: #856404;
+            background: var(--warn-soft);
+            color: var(--warn);
         }
 
         .method.put {
-            background: #cce5ff;
-            color: #004085;
+            background: var(--accent-soft);
+            color: var(--accent);
         }
 
         .method.delete {
-            background: #f8d7da;
-            color: #721c24;
+            background: var(--danger-soft);
+            color: var(--danger);
         }
 
         /* Code Blocks */
         .code-block {
-            background: #1e1e1e;
-            color: #d4d4d4;
+            background: var(--rd-code-surface);
+            color: var(--rd-code-text);
             padding: 1.5rem;
             border-radius: 8px;
             overflow-x: auto;
@@ -283,30 +220,21 @@
         }
 
         .alert.info {
-            background: #e7f3ff;
-            border-color: var(--secondary-color);
-            color: #004085;
+            background: var(--accent-soft);
+            border-color: var(--accent);
+            color: var(--text);
         }
 
         .alert.warning {
-            background: #fff8e1;
-            border-color: var(--warning-color);
-            color: #663c00;
+            background: var(--warn-soft);
+            border-color: var(--warn);
+            color: var(--text);
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-links {
-                margin-left: 0;
-            }
-
             .main-content {
-                padding: 8rem 1rem 2rem;
+                padding: 1.5rem 1rem 2rem;
             }
 
             .hero h1 {

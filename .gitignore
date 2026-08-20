@@ -5,3 +5,5 @@ storage/
 raindrippy/content
 raindrippy/projects/ # big one... we mustn't push this, could be huge
 raindrippy/sol_content/
+# Local preview fixtures for ?mock=1 - never deploy these
+_mock/
