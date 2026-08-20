@@ -72,8 +72,9 @@
 
         var btn = document.getElementById('themeToggle');
         if (!btn) {
-            // Injected rather than pasted into 14 files. It lands while the
-            // topbar is still fading in, so the insertion is invisible.
+            // Fallback only. Every RainDrippy page carries the button in its
+            // topbar markup; this covers a page that forgot it. The injection
+            // lands while the topbar is still fading in, so it is invisible.
             btn = document.createElement('button');
             btn.type = 'button';
             btn.id = 'themeToggle';
