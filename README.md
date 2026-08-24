@@ -32,9 +32,44 @@ A dedicated platform for the BakoSMP Minecraft server, featuring:
 This project is built as a highly performant static web application with dynamic API integrations.
 
 - **Frontend:** Vanilla HTML5, CSS3 (with custom animations), and JavaScript.
-- **Backgrounds:** Interactive particle systems relying on `particles.js` (BakoSMP pages).
+- **Backgrounds:** A small canvas ember field (`js/embers.js`) on the BakoSMP pages — no external library.
 - **Security:** Hardware fingerprinting for authentication and `ddosprot` for last line of defense infrastructure protection.
 - **API Integration:** Connects to `bakosmp.go.ro/api` for server-side logic (Skins, Auth, etc.).
+
+### BakoSMP design system
+
+Every page under the site root (`index`, `uploads`, `downloads`, `history`, the
+account pages, `settings`, `ai`, `redir`) shares one stylesheet: **`main.css`**.
+
+- It is **dark only, on purpose** — that is the server's identity. There is no
+  light mode and no theme toggle here, unlike the RainDrippy pages. Every colour
+  is painted explicitly rather than inherited from the host, so the page holds up
+  whatever the visitor's system theme is set to.
+- The palette lives in CSS custom properties on `:root`: `--ground`/`--stone` for
+  the cave-rock neutrals, `--flame`/`--ember` for the server's orange, and
+  `--live`/`--bad`/`--warn` used **only** for meaning, never as a second accent.
+- The same block also aliases RainDrippy's token names (`--bg-panel`, `--accent`,
+  …) onto the flame palette. That is what dresses the shared `cookie.css` banner
+  correctly on this half of the site; without it the banner falls back to
+  RainDrippy's cyan.
+- Type is Bricolage Grotesque (display), Public Sans (body) and JetBrains Mono
+  (anything numeric or machine-written).
+- Pages opt in by loading `main.css` and carrying the shared furniture:
+  `<canvas id="embers">`, `<header class="bar">`, the cookie banner, and
+  `<footer class="page">`.
+
+Three small scripts back it up, and every page loads all three:
+
+| File | Job |
+| --- | --- |
+| `js/embers.js` | The drifting motes. Skipped entirely under `prefers-reduced-motion`, and paused while the tab is hidden. |
+| `js/session.js` | Asks `/api/logged-in` **once** and exposes the answer as `window.session` (a Promise), so pages that gate on a session reuse it instead of asking again. Also reveals either the "Signed in as…" chip or the "Log in" button in the topbar. |
+| `js/toast.js` | `window.toast(message, ok)`. Builds its own node, so there is no markup to copy. Use it for "that worked"; anything worth re-reading belongs in a `.note` beside the form. |
+
+`js/genFP.js` computes the device fingerprint the auth API expects. It sets the
+`hwid` cookie on load **and** exports `window.deviceFingerprint()` for the pages
+that send the value in a request body. Register, login and finish-signup each
+used to carry their own byte-identical copy of that function.
 
 ### RainDrippy design system
 

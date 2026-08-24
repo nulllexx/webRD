@@ -1,220 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Register</title>
-  <link rel="stylesheet" href="/main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    
-    .section {
-      padding-top: 2em;
-      margin-top: -2em; /* Offset for fixed header if needed */
-    }
-    
-    .section:target {
-      animation: highlight 2s ease-in-out;
-    }
-    
-    @keyframes highlight {
-      0% { background-color: rgba(255, 255, 255, 0.1); }
-      50% { background-color: rgba(255, 255, 255, 0.2); }
-      100% { background-color: transparent; }
-    }
-    input[type="date"] {
-    background-color: #1a1a1b;
-    padding: 12px;
-    color: #ffffff;
-    font-size: 16px;
-    border: 2px solid #333533;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    font-family: 'Segoe UI', sans-serif;
-    appearance: none; /* Removes default system styling */
-}
-
-  /* Hover & Focus States */
-  input[type="date"]:hover {
-      border-color: #4a4e69;
-  }
-
-  input[type="date"]:focus {
-      border-color: #7209b7;
-      box-shadow: 0 0 8px rgba(114, 9, 183, 0.4);
-  }
-
-  /* Customizing the Calendar Icon and Controls */
-  /* These targets work primarily in Chrome/Edge/Safari */
-
-  ::-webkit-calendar-picker-indicator {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>');
-      cursor: pointer;
-      filter: invert(0); /* Ensures the custom SVG stays white */
-  }
-
-  ::-webkit-datetime-edit-text, 
-  ::-webkit-datetime-edit-month-field, 
-  ::-webkit-datetime-edit-day-field, 
-  ::-webkit-datetime-edit-year-field {
-      color: #e0e0e0;
-  }
-
-  /* Selection highlight when clicking parts of the date */
-  ::-webkit-datetime-edit-fields-wrapper:focus {
-      background-color: #333533;
-  }
-
-  .oauth-divider {
-    display: flex;
-    align-items: center;
-    gap: 1em;
-    margin: 1.5em 0 1em;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9em;
-  }
-  .oauth-divider hr {
-    flex: 1;
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    margin: 0;
-  }
-  .google-signin-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: #fff;
-    color: #1f1f1f;
-    padding: 10px 20px;
-    border-radius: 5px;
-    text-decoration: none;
-    font-family: 'Roboto', Arial, sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    border: 1px solid #dadce0;
-    transition: background 0.2s ease, transform 0.2s ease;
-  }
-  .google-signin-btn:hover {
-    background: #f8f9fa;
-    transform: scale(1.02);
-  }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Register</title>
+    <meta name="description" content="Create a BakoSMP site account.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Account</span>
+        <h1>Create an account</h1>
+        <p class="lead">
+            This gets you skin uploads, polls and settings on the site. Joining the
+            Minecraft server itself happens through Discord and needs none of this.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Register</h2>
+        </div>
+        <div class="panel lit">
+            <form id="registerForm" class="stack">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                    <p class="hint">Use your Minecraft name if you want skin uploads to line up.</p>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="birthdate">Date of birth</label>
+                    <input type="date" id="birthdate" name="birthdate" required>
+                    <p class="hint">Checked once, at signup, and never shown to anyone.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">Create account</button>
+                    <a class="btn btn-quiet" href="/login.html">I already have one</a>
+                </div>
+                <p class="note" id="registerNote" role="status"></p>
+            </form>
+            <div class="divider">or</div>
+            <a class="google-btn" href="/api/auth/oauth/google">
+                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                    <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                </svg>
+                <span>Sign up with Google</span>
+            </a>
+            <p class="hint">By using our services you agree to the <a href="/raindrippy/privacy-policy">Privacy Policy</a>.</p>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <!-- Register Section -->
-    <section id="register" class="section">
-      <h1>Register</h1>
-      <p style="margin-top: 2em;">Create an account here! If you already have one, login <a href="/login.html">here</a>.</p>
-      <form id="registerForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required />
-        <br />
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required />
-        <br />
-        <label for="birthdate">Birthdate:</label>
-        <input type="date" id="birthdate" name="birthdate" required />
-        <br />
-        <br />
-        <button type="submit">Register</button>
-        <p id="registerMessage" style="margin-top: 1em;"></p>
-      </form>
-      <div class="oauth-divider"><hr><span>or</span><hr></div>
-      <a href="https://bakosmp.go.ro/api/auth/oauth/google" class="google-signin-btn">
-        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-          <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-          <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
-          <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
-          <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
-        </svg>
-        <span>Sign up with Google</span>
-      </a>
-      <p style="margin-top: 1em;">By using our services, you agree to the <a href="/raindrippy/privacy-policy.html">Privacy Policy</a>.</p>
-    </section>
-    <script>
-      
-      function generateDeviceFingerprint() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('Device fingerprint', 2, 2);
-        
-        const fingerprint = [
-          navigator.userAgent,
-          navigator.language,
-          screen.width + 'x' + screen.height,
-          new Date().getTimezoneOffset(),
-          navigator.hardwareConcurrency || 'unknown',
-          canvas.toDataURL()
-        ].join('|');
-        canvas.style.display = 'none';  
-        // Hash it for consistency
-        let hwid = btoa(fingerprint).substring(0, 32)
-        return hwid;
-      }
-      document.getElementById('birthdate').setAttribute('max', new Date().toISOString().split('T')[0]);
-      document.getElementById('registerForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const birthdate = document.getElementById('birthdate').value;
-      const hwid = generateDeviceFingerprint();
-      fetch('https://bakosmp.go.ro/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password, hwid, birthdate })
-      })
-      .then(async response => {
-        const messageElement = document.getElementById('registerMessage');
-        const data = await response.json();
+</div>
 
-        if (response.status === 201 || response.status === 200) {
-          messageElement.textContent = 'Registration successful!';
-          messageElement.style.color = 'green';
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script>
+function say(note, message, kind) {
+    note.textContent = message;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+}
+
+// Nobody was born tomorrow.
+document.getElementById('birthdate').max = new Date().toISOString().split('T')[0];
+
+document.getElementById('registerForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const note = document.getElementById('registerNote');
+    const button = event.target.querySelector('button[type="submit"]');
+
+    say(note, 'Creating your account\u2026', 'busy');
+    button.disabled = true;
+
+    fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            birthdate: document.getElementById('birthdate').value,
+            hwid: window.deviceFingerprint()
+        })
+    })
+    .then(async function (response) {
+        const data = await response.json().catch(function () { return {}; });
+
+        if (response.status === 200 || response.status === 201) {
+            say(note, 'Account created. You can log in now.', 'ok');
+            setTimeout(function () { window.location.href = '/login.html'; }, 1600);
         } else if (response.status === 409) {
-          messageElement.textContent = 'Username already exists. Please choose another.';
-          messageElement.style.color = 'red';
-         } else {
-          messageElement.textContent = 'Registration failed: ' + (data.message || 'Unknown error');
-          messageElement.style.color = 'red';
+            say(note, 'That username is taken. Try another.', 'bad');
+            button.disabled = false;
+        } else {
+            say(note, data.message || 'Could not create the account.', 'bad');
+            button.disabled = false;
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        const messageElement = document.getElementById('registerMessage');
-        messageElement.textContent = 'An error occurred. Please try again.';
-        messageElement.style.color = 'red';
-      });
+    })
+    .catch(function () {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+        button.disabled = false;
     });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="particles.js"></script>
-    <script src="/js/genFP.js"></script>
-  </div>
+});
+</script>
 </body>
 </html>

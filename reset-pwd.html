@@ -1,104 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Reset Password</title>
-  <link rel="stylesheet" href="/main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    
-    .section {
-      padding-top: 2em;
-      margin-top: -2em; /* Offset for fixed header if needed */
-    }
-    
-    .section:target {
-      animation: highlight 2s ease-in-out;
-    }
-    
-    @keyframes highlight {
-      0% { background-color: rgba(255, 255, 255, 0.1); }
-      50% { background-color: rgba(255, 255, 255, 0.2); }
-      100% { background-color: transparent; }
-    }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Reset password</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Account</span>
+        <h1>Reset your password</h1>
+        <p class="lead" id="lead">Choose something you have not used anywhere else.</p>
+    </section>
+
+    <section class="section" id="formSection" hidden>
+        <div class="section-head">
+            <h2>New password</h2>
+        </div>
+        <div class="panel lit">
+            <form id="resetForm" class="stack">
+                <div class="field">
+                    <label for="newPassword">New password</label>
+                    <input type="password" id="newPassword" autocomplete="new-password" required>
+                </div>
+                <div class="field">
+                    <label for="confirmPassword">Confirm new password</label>
+                    <input type="password" id="confirmPassword" autocomplete="new-password" required>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">Reset password</button>
+                </div>
+                <p class="note" id="resetNote" role="status"></p>
+            </form>
+        </div>
+    </section>
+
+    <section class="section" id="noSessionSection" hidden>
+        <div class="section-head">
+            <h2>No reset link</h2>
+        </div>
+        <div class="panel sunk">
+            <div class="callout">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+                <span><b>This page only works from a reset link.</b> The link support sends you carries a one-time session in its address; opening the page directly leaves nothing to reset.</span>
+            </div>
+            <div class="actions">
+                <a class="btn btn-quiet" href="mailto:raindrippy.contact@protonmail.com">Ask support for a link</a>
+                <a class="btn btn-quiet" href="/login.html">Back to log in</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <section id="reset-password" class="section"></section>
-    <script>
-      const session = new URLSearchParams(window.location.search).get('session');
-      if (!session) {
-        document.write('<h3 style="text-align: center;">You need to have a session ID in the URL to use this webpage.</h3>');
-      } else {
-        document.write(`
-          <h1 style="text-align: center;">Reset Password</h1>
-          <form id="resetForm" style="max-width: 400px; margin: auto;">
-            <input type="hidden" id="session" name="session" value="${session}" />
-            <label for="newPassword">New Password:</label><br/>
-            <input type="password" id="newPassword" name="newPassword" required style="width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box;"/><br/>
-            <label for="confirmPassword">Confirm Password:</label><br/>
-            <input type="password" id="confirmPassword" name="confirmPassword" required style="width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box;"/><br/>
-            <button type="submit" style="width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Reset Password</button>
-          </form>
-          <p id="message" style="text-align: center; color: red;"></p>
-        `);
-      }
-    </script>
-    <script>
-      document.getElementById('resetForm')?.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const session = document.getElementById('session').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const messageElem = document.getElementById('message');
+</div>
 
-        if (newPassword !== confirmPassword) {
-          messageElem.textContent = 'Passwords do not match.';
-          return;
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script>
+/* The one-time session arrives in the query string. Without it there is nothing
+   this page can do, so show the explanation instead of a form that would fail
+   on submit. */
+(function () {
+    const session = new URLSearchParams(window.location.search).get('session');
+
+    if (!session) {
+        document.getElementById('noSessionSection').hidden = false;
+        document.getElementById('lead').textContent =
+            'This page needs the one-time link that support sends you.';
+        return;
+    }
+
+    document.getElementById('formSection').hidden = false;
+
+    const note = document.getElementById('resetNote');
+    function say(message, kind) {
+        note.textContent = message;
+        note.className = 'note' + (kind ? ' ' + kind : '');
+    }
+
+    document.getElementById('resetForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const password = document.getElementById('newPassword').value;
+        const confirm = document.getElementById('confirmPassword').value;
+        const button = event.target.querySelector('button[type="submit"]');
+
+        if (password !== confirm) {
+            say('Those two do not match.', 'bad');
+            return;
         }
+
+        say('Resetting\u2026', 'busy');
+        button.disabled = true;
 
         try {
-          const response = await fetch('/api/forgot-password', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ resetSession: session, newPassword })
-          });
-          const result = await response.json();
-          if (response.status === 200) {
-            messageElem.style.color = 'green';
-            messageElem.textContent = 'Password reset successfully. You can now log in with your new password.';
-          } else {
-            messageElem.textContent = result.error || 'An error occurred.';
-          }
-        } catch (error) {
-          messageElem.textContent = 'An error occurred. Please try again later.';
+            const response = await fetch('/api/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resetSession: session, newPassword: password })
+            });
+            const data = await response.json().catch(function () { return {}; });
+
+            if (response.status === 200) {
+                say('Password reset. You can log in with it now.', 'ok');
+                setTimeout(function () { window.location.href = '/login.html'; }, 2000);
+            } else {
+                say(data.error || 'Could not reset the password. The link may have expired.', 'bad');
+                button.disabled = false;
+            }
+        } catch (err) {
+            say('Could not reach the server. Try again in a moment.', 'bad');
+            button.disabled = false;
         }
-      });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="particles.js"></script>
-    <script src="/js/genFP.js"></script>
-  </div>
+    });
+})();
+</script>
 </body>
 </html>

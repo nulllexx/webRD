@@ -1,105 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - World Downloads</title>
-  <link rel="stylesheet" href="/main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
-  <style>
-    .season-entry button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 14px;
-      border-radius: 4px;
-    }
-
-    .season-entry button:hover {
-      background-color: #45a049;
-    }
-    .season-entry {
-        font-family: Arial, sans-serif;
-        font-size: 16px;
-        background-color: rgb(36, 36, 36);
-        border-radius: 16px;
-        border: 2px solid rgb(58, 58, 58);
-    }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - World downloads</title>
+    <meta name="description" content="Download archived BakoSMP season worlds.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index.html" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads.html" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html" aria-current="page">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Archive</span>
+        <h1>World downloads</h1>
+        <p class="lead">
+            Every season we have archived, packaged as it stood the day it ended.
+            Open one in single-player to walk back through a world nobody lives in
+            any more.
+        </p>
+        <span class="assurance">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <path d="M7 10l5 5 5-5"></path>
+                <path d="M12 15V3"></path>
+            </svg>
+            <span><strong>These are large files.</strong> A whole season's map is hundreds of megabytes &mdash; use a real connection.</span>
+        </span>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Archived seasons</h2>
+            <span class="tally" id="tally"></span>
+        </div>
+        <div class="stack" id="seasons">
+            <div class="empty">Loading the archive&hellip;</div>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <h1>World Downloads</h1>
-    <p>Download the latest worlds for BakoSMP below. These are all the archives that we have available.</p>
-    <div id="seasons-container"></div>
+</div>
 
-    <script>
-        const endpoint = '/api/fetch-worlds';
-        const container = document.getElementById('seasons-container');
-        fetch(endpoint)
-        .then(res => res.json())
-        .then(seasons => {
-            seasons.forEach(season => {
-            // Create a div for this season
-            const div = document.createElement('div');
-            div.className = 'season-entry';
-            div.style.border = '1px solid #ccc';
-            div.style.padding = '10px';
-            div.style.margin = '5px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script>
+/* The archive list comes from the server; the page starts in its loading state
+   and moves to exactly one of three ends: some seasons, no seasons, or we could
+   not ask. Saying which is the whole job here — an empty list and a dead API
+   look identical otherwise. */
+(async function () {
+    const box = document.getElementById('seasons');
+    const tally = document.getElementById('tally');
 
-            // Season name
-            const name = document.createElement('span');
-            name.textContent = season.name;
-            div.appendChild(name);
+    let seasons;
+    try {
+        const response = await fetch('/api/fetch-worlds');
+        if (!response.ok) { throw new Error('HTTP ' + response.status); }
+        seasons = await response.json();
+    } catch (err) {
+        box.innerHTML = '<div class="empty">Could not load the archive. Refresh to try again.</div>';
+        return;
+    }
 
-            // Download button
-            const btn = document.createElement('button');
-            btn.textContent = 'Download';
-            btn.style.cursor = 'pointer';
-            btn.onclick = () => {
-                // triggers download
-                const a = document.createElement('a');
-                a.href = season.path;
-                a.download = season.path.split('/').pop(); // filename
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-            };
-            div.appendChild(btn);
+    if (!Array.isArray(seasons) || !seasons.length) {
+        box.innerHTML = '<div class="empty">Nothing archived yet. Seasons appear here once they end.</div>';
+        return;
+    }
 
-            // Add div to container
-            container.appendChild(div);
-            });
-        })
-        .catch(err => console.error('Error fetching seasons:', err));
-    </script>
+    box.innerHTML = '';
+    tally.textContent = seasons.length + (seasons.length === 1 ? ' world' : ' worlds');
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="particles.js"></script>
-    <script src="/js/genFP.js"></script>
-  </div>
+    seasons.forEach(function (season) {
+        const row = document.createElement('div');
+        row.className = 'row';
+
+        const name = document.createElement('div');
+        name.className = 'row-name';
+
+        const strong = document.createElement('strong');
+        strong.textContent = season.name;
+
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = String(season.path || '').split('/').pop();
+
+        name.appendChild(strong);
+        name.appendChild(meta);
+
+        // A plain download link rather than a synthesised click: the browser
+        // gets to show its own progress, and a middle-click still works.
+        const link = document.createElement('a');
+        link.className = 'btn btn-primary btn-sm';
+        link.href = season.path;
+        link.setAttribute('download', '');
+        link.textContent = 'Download';
+
+        row.appendChild(name);
+        row.appendChild(link);
+        box.appendChild(row);
+    });
+})();
+</script>
 </body>
 </html>

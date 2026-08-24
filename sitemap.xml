@@ -7,35 +7,35 @@
 
 <url>
   <loc>https://bakosmp.go.ro/</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>monthly</changefreq>
   <priority>1.0</priority>
 </url>
 
 <url>
   <loc>https://bakosmp.go.ro/uploads</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.8</priority>
 </url>
 
 <url>
   <loc>https://bakosmp.go.ro/downloads</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.7</priority>
 </url>
 
 <url>
   <loc>https://bakosmp.go.ro/login</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>yearly</changefreq>
   <priority>0.6</priority>
 </url>
 
 <url>
   <loc>https://bakosmp.go.ro/register</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>yearly</changefreq>
   <priority>0.6</priority>
 </url>
@@ -77,16 +77,30 @@
 
 <url>
   <loc>https://bakosmp.go.ro/ai</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.5</priority>
 </url>
 
 <url>
   <loc>https://bakosmp.go.ro/getData</loc>
-  <lastmod>2026-04-17</lastmod>
+  <lastmod>2026-08-24</lastmod>
   <changefreq>monthly</changefreq>
   <priority>0.5</priority>
+</url>
+
+<url>
+  <loc>https://bakosmp.go.ro/history</loc>
+  <lastmod>2026-08-24</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://bakosmp.go.ro/polls</loc>
+  <lastmod>2026-08-24</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.7</priority>
 </url>
 
 </urlset>

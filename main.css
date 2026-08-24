@@ -1,235 +1,997 @@
+/* ===========================================================================
+   BakoSMP — shared stylesheet
+   ---------------------------------------------------------------------------
+   Every page under the site root (index, uploads, downloads, history, the auth
+   pages, settings, ai, redir) loads this one file. The RainDrippy side of the
+   site has its own sheet at /raindrippy/index.css and is deliberately NOT
+   affected by anything here.
+
+   Committed to a single dark world on purpose: it is the server's identity and
+   the game's. Every colour is painted explicitly so the page holds up whatever
+   the visitor's system theme happens to be. There is no light mode and no
+   toggle here, unlike the RainDrippy pages.
+   ======================================================================== */
+
+:root {
+    /* Ground and stone. Neutrals carry a faint cool-green bias, so they read
+       as cave rock rather than as unconsidered grey. */
+    --ground:      #0C0E0F;
+    --stone:       #14181A;
+    --stone-lit:   #1B2023;
+    --stone-sunk:  #101314;
+    --seam:        rgba(255, 255, 255, 0.07);
+    --seam-strong: rgba(255, 255, 255, 0.13);
+
+    /* Text warms slightly, as though lit by the torch. */
+    --text:        #E8E6E1;
+    --text-dim:    #96A0A3;
+    --text-faint:  #6B7679;
+
+    /* The server's orange, kept exactly as it was on the old pages. */
+    --flame:       #F39C12;
+    --ember:       #E67E22;
+    --flame-soft:  rgba(243, 156, 18, 0.14);
+    --flame-edge:  rgba(243, 156, 18, 0.35);
+
+    /* Semantic only — never used as a second accent. */
+    --live:        #5FD08A;
+    --live-soft:   rgba(95, 208, 138, 0.13);
+    --bad:         #F0736A;
+    --bad-soft:    rgba(240, 115, 106, 0.13);
+    --warn:        #E8C05A;
+    --warn-soft:   rgba(232, 192, 90, 0.13);
+
+    --r:           10px;
+    --r-sm:        7px;
+
+    --measure:     62ch;
+    --page:        900px;
+    --page-wide:   1080px;
+
+    --sans:  "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+    --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* ---- Aliases consumed by /cookie.css -------------------------------
+       That sheet is shared with the RainDrippy pages and reads its colours
+       from RainDrippy's token names, falling back to literals when they are
+       absent. Declaring them here dresses the cookie banner in the flame
+       palette instead of letting it fall back to RainDrippy's cyan. */
+    --bg-panel:        var(--stone);
+    --line:            var(--seam-strong);
+    --text-muted:      var(--text-dim);
+    --accent:          var(--flame);
+    --accent-dim:      var(--ember);
+    --accent-contrast: #201400;
+    --radius:          var(--r);
+    --radius-sm:       var(--r-sm);
+    --shadow:          0 14px 40px rgba(0, 0, 0, 0.6);
+
+    color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+/* The `hidden` attribute has to actually hide. The browser's own
+   [hidden]{display:none} is a user-agent rule, and ANY author `display:` beats
+   it regardless of specificity - so `<div class="panel" hidden>` would render,
+   because .panel sets display:flex. Several things here start hidden and are
+   revealed by script (the topbar session chip, the staff-only Edit button, the
+   two halves of the password reset page), and every one of them depends on
+   this line. Do not remove it. */
+[hidden] { display: none !important; }
+
 body {
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(45deg, #1e2a47, #5d6d7e, #2c3e50, #34495e);
-            color: #fff;
-            text-align: center;
-            line-height: 1.6;
-            background-size: 400% 400%;
-            animation: gradientAnimation 15s ease infinite;
-            overflow-x: hidden;
-        }
-
-        /* Enhanced Background Animation */
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 50% 25%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 75%; }
-            100% { background-position: 0% 50%; }
-        }
-        .content {
-            margin-top: 100px;
-            padding: 40px;
-            text-align: left;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(30px);
-            opacity: 0;
-            animation: slideUp 1s ease-out forwards 0.3s;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        /* Top Bar with Enhanced Animation */
-        .topbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            margin-bottom: 100em;
-            background: rgba(20, 20, 20, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeIn 0.8s ease-out forwards;
-            z-index: 1000;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
-        }
-        hr {
-            border-color: rgb(146, 146, 146);
-            color: rgb(146, 146, 146);
-        }
-        .logo {
-            height: 40px;
-            margin-right: 15px;
-            animation: pulse 3s infinite;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        .title {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #f39c12, #e74c3c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: titleGlow 4s infinite;
-        }
-        input[type="file"]::file-selector-button, input[type="file"]::-webkit-file-upload-button {
-            margin-right: 1em;
-            padding: 0.5em 1em;
-            background: #1abc9c;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            color: white;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        input[type="file"]::file-selector-button:hover, input[type="file"]::-webkit-file-upload-button:hover {
-            background: #16a085;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 16px;
-            border-color: rgb(82, 82, 82);
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #1abc9c;
-            outline: none;
-            box-shadow: 0 0 5px rgba(26, 188, 156, 0.5);
-        }
-        button {
-            background: rgb(45, 212, 12);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: rgb(13, 150, 13);
-            transform: scale(1.05);
-        }
-        /* Content Section with Enhancements */
-        .content {
-            margin-top: 100px;
-            padding: 40px;
-            text-align: left;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(30px);
-            opacity: 0;
-            animation: slideUp 1s ease-out forwards 0.3s;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        p {
-            font-family: Arial, sans-serif;
-            color: whitesmoke;
-        }
-
-        .aibtn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .aibtn:hover {
-            background-color: #2980b9;
-            transform: scale(1.05);
-        }
-        /* Particles Background */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-        a {
-            text-decoration: underline;
-            color: #2980b9;
-            font-family: sans-serif;
-            transition: color 0.3s ease;
-        }
-        a:hover {
-            color: #1abc9c;
-        }
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .content {
-                padding: 20px;
-                margin-top: 80px;
-            }
-
-            .title {
-                font-size: 18px;
-            }
-
-            h2 {
-                font-size: 24px;
-            }
-
-            h3 {
-                font-size: 18px;
-            }
-
-            p {
-                font-size: 16px;
-            }
-
-            .scroll-indicator {
-                display: none;
-            }
-        }
-        @keyframes slideUp {
-  0% {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+/* The torch: one warm pool of light near the top, falling off into the dark.
+   Fixed, so it stays put while the page scrolls past it. */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(120% 70% at 50% -10%, rgba(243, 156, 18, 0.10), transparent 60%),
+        radial-gradient(80% 50% at 85% 15%, rgba(230, 126, 34, 0.05), transparent 70%);
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.1); }
+/* Warm motes drifting up out of the dark, drawn by /js/embers.js. Replaces the
+   linked-dot particle field the old pages loaded from a CDN: it is a hundred
+   lines of canvas and nothing external has to load. */
+#embers {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
 }
 
-@keyframes titleGlow {
-  0%, 100% { text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-  50%      { text-shadow: 0 0 20px rgba(255,255,255,1); }
+::selection { background: var(--flame-edge); color: var(--text); }
+
+:focus-visible { outline: 2px solid var(--flame); outline-offset: 2px; }
+
+/* --------------------------------------------------------------- topbar */
+
+.bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 24px;
+    background: rgba(12, 14, 15, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--seam);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 22px;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+    flex: none;
+}
+
+/* The logo, lit like a torch-side block. Kept as an <img class="logo"> rather
+   than a drawn shape because /js/events.js swaps its src for the Pride variant
+   each June — losing the element would silently kill that. */
+.brand .logo {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    object-fit: cover;
+    border-radius: 5px;
+    box-shadow:
+        0 0 14px rgba(243, 156, 18, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.bar nav {
+    display: flex;
+    gap: 2px;
+    /* The old sheet hid the nav entirely on narrow screens. Scrolling it keeps
+       every destination reachable on a phone. */
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.bar nav::-webkit-scrollbar { display: none; }
+
+.bar a.nav {
+    padding: 7px 12px;
+    border-radius: var(--r-sm);
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: color 0.16s ease, background 0.16s ease;
+}
+.bar a.nav:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+.bar a.nav[aria-current="page"] { color: var(--flame); background: var(--flame-soft); }
+
+.bar .spacer { flex: 1; min-width: 8px; }
+
+/* Signed-in chip, filled in by /js/session.js. Starts hidden so a signed-out
+   visitor never sees it flicker. */
+.who {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 6px;
+    border: 1px solid var(--seam);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--stone);
+    text-decoration: none;
+    white-space: nowrap;
+    flex: none;
+    transition: border-color 0.16s ease, color 0.16s ease;
+}
+a.who:hover { border-color: var(--flame-edge); color: var(--text); }
+.who .head {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: linear-gradient(140deg, #6E8C4B, #4E6B33);
+    flex: none;
+}
+.who strong { color: var(--text); font-weight: 600; }
+
+/* ----------------------------------------------------------------- page */
+
+main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+    flex: 1 0 auto;
+}
+
+main.wide { max-width: var(--page-wide); }
+
+.intro { display: flex; flex-direction: column; gap: 14px; }
+
+.eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--flame);
+}
+
+h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.1rem, 5.5vw, 3.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+}
+
+h2, h3, h4 {
+    font-family: var(--display);
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.lead {
+    margin: 0;
+    max-width: var(--measure);
+    font-size: 1.06rem;
+    color: var(--text-dim);
+}
+
+/* A quiet reassurance pinned under the lead — the thing a visitor most needs
+   to hear on this particular page. */
+.assurance {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    align-self: flex-start;
+    margin-top: 6px;
+    padding: 8px 14px 8px 11px;
+    border: 1px solid var(--seam);
+    border-radius: 999px;
+    background: var(--stone);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+.assurance svg { flex: none; color: var(--flame); }
+.assurance strong { color: var(--text); font-weight: 600; }
+
+.intro .actions { margin-top: 10px; }
+
+/* -------------------------------------------------------------- sections */
+
+.section { display: flex; flex-direction: column; gap: 18px; }
+
+.section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--seam);
+}
+
+.section-head h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.22rem;
+}
+
+.section-head .tally {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.section-head .spacer { flex: 1; }
+
+.stack { display: flex; flex-direction: column; gap: 16px; }
+
+/* Whole sections stacked together, at the same rhythm <main> uses. */
+.stack-lg { display: flex; flex-direction: column; gap: 56px; }
+
+.grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* --------------------------------------------------------------- panels */
+
+/* The card. State lives in its ground, not in a stripe down its edge: a live
+   panel is lit and slightly raised, a spent one is flat and recessed. */
+.panel {
+    position: relative;
+    padding: 22px 24px;
+    border: 1px solid var(--seam);
+    border-radius: var(--r);
+    background: var(--stone);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.panel.lit {
+    background: linear-gradient(180deg, var(--stone-lit), var(--stone));
+    border-color: var(--seam-strong);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.055),
+        0 1px 2px rgba(0, 0, 0, 0.4),
+        0 18px 44px -28px rgba(243, 156, 18, 0.5);
+}
+
+.panel.sunk {
+    background: var(--stone-sunk);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.panel-title {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 1.32rem;
+    line-height: 1.25;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+}
+
+.panel-desc {
+    margin: -4px 0 0;
+    max-width: var(--measure);
+    font-size: 0.94rem;
+    color: var(--text-dim);
+}
+
+/* Feature card: an icon over a short claim. Used on the landing page. */
+.feature {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 20px;
+    border: 1px solid var(--seam);
+    border-radius: var(--r);
+    background: var(--stone);
+}
+.feature .ico {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-sm);
+    background: var(--flame-soft);
+    color: var(--flame);
+    flex: none;
+}
+.feature h3 { margin: 0; font-size: 1.02rem; font-weight: 700; }
+.feature p  { margin: 0; font-size: 0.9rem; color: var(--text-dim); }
+
+/* A card that is a link. Same ground as .feature, plus a hover lift. */
+a.feature {
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.16s ease, transform 0.12s ease, background 0.16s ease;
+}
+a.feature:hover {
+    border-color: var(--flame-edge);
+    background: var(--stone-lit);
+    transform: translateY(-2px);
+}
+a.feature .go {
+    margin-top: 2px;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--flame);
+}
+
+/* --------------------------------------------------------------- states */
+
+.state {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: var(--text-faint);
+    background: rgba(255, 255, 255, 0.045);
+}
+.state.live { color: var(--live); background: var(--live-soft); }
+.state.hot  { color: var(--ember); background: var(--flame-soft); }
+.state.bad  { color: var(--bad); background: var(--bad-soft); }
+
+.dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+}
+.state.live .dot { animation: ping 2.6s ease-out infinite; }
+
+@keyframes ping {
+    0%   { box-shadow: 0 0 0 0 rgba(95, 208, 138, 0.55); }
+    70%  { box-shadow: 0 0 0 7px rgba(95, 208, 138, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(95, 208, 138, 0); }
+}
+
+.meta {
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- forms */
+
+form { margin: 0; }
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field > label,
+.label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"],
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+    width: 100%;
+    padding: 11px 13px;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--seam-strong);
+    border-radius: var(--r-sm);
+    transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+input::placeholder, textarea::placeholder { color: var(--text-faint); }
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+input[type="date"]:hover,
+select:hover,
+textarea:hover { border-color: var(--text-faint); }
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--flame);
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 0 0 3px var(--flame-soft);
+}
+
+textarea {
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 160px;
+}
+
+/* The date picker's own chrome is drawn by the browser; nudge it into the
+   dark world rather than leaving a white calendar icon on black. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.55);
+    cursor: pointer;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover { filter: invert(1) opacity(0.9); }
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    font: inherit;
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px dashed var(--seam-strong);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: border-color 0.16s ease;
+}
+input[type="file"]:hover { border-color: var(--flame-edge); }
+
+input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--stone-lit);
+    border: 1px solid var(--seam-strong);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: background 0.16s ease, border-color 0.16s ease;
+}
+input[type="file"]::file-selector-button:hover {
+    background: var(--stone);
+    border-color: var(--flame-edge);
+}
+
+.hint {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+}
+
+/* A rule between two ways of doing the same thing (password vs. Google). */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text-faint);
+    font-size: 0.82rem;
+}
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--seam);
+}
+
+.google-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 20px;
+    background: #fff;
+    color: #1f1f1f;
+    border: 1px solid #dadce0;
+    border-radius: var(--r-sm);
+    text-decoration: none;
+    font-family: "Roboto", var(--sans);
+    font-weight: 500;
+    font-size: 0.88rem;
+    transition: background 0.16s ease;
+}
+.google-btn:hover { background: #f1f3f4; }
+
+/* -------------------------------------------------------------- buttons */
+
+.btn {
+    font: inherit;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 10px 20px;
+    border-radius: var(--r-sm);
+    border: 1px solid transparent;
+    background: var(--stone-lit);
+    color: var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: filter 0.16s ease, background 0.16s ease, border-color 0.16s ease, transform 0.08s ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+    background: linear-gradient(160deg, var(--flame), var(--ember));
+    color: #201400;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 6px 18px -8px rgba(243, 156, 18, 0.8);
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-quiet {
+    background: transparent;
+    border-color: var(--seam-strong);
+    color: var(--text-dim);
+}
+.btn-quiet:hover:not(:disabled) { color: var(--text); border-color: var(--text-faint); }
+
+.btn-danger {
+    background: transparent;
+    border-color: rgba(240, 115, 106, 0.45);
+    color: var(--bad);
+}
+.btn-danger:hover:not(:disabled) {
+    background: var(--bad-soft);
+    border-color: var(--bad);
+}
+
+.btn-sm { padding: 7px 14px; font-size: 0.85rem; }
+
+.btn:disabled {
+    background: var(--stone-lit);
+    color: var(--text-faint);
+    box-shadow: none;
+    border-color: var(--seam);
+    cursor: not-allowed;
+    filter: none;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* A one-field form laid out as a row - a lookup box, a question box. The input
+   takes the slack; the button beside it keeps its own width. */
+.actions input[type="text"],
+.actions input[type="search"] {
+    flex: 1 1 200px;
+    min-width: 0;
+    max-width: 320px;
+}
+.actions.grow input[type="text"] { max-width: none; }
+
+/* --------------------------------------------------------------- notes */
+
+/* Inline result of something the visitor just did. Hidden until it has
+   something to say, so no empty box sits under every form. */
+.note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 11px 14px;
+    border: 1px solid var(--seam-strong);
+    border-left-width: 3px;
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.22);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+.note:empty { display: none; }
+.note.ok   { border-left-color: var(--live); color: var(--text); background: var(--live-soft); }
+.note.bad  { border-left-color: var(--bad);  color: var(--text); background: var(--bad-soft); }
+.note.warn { border-left-color: var(--warn); color: var(--text); background: var(--warn-soft); }
+.note.busy { border-left-color: var(--flame); }
+
+/* A standing explanation, not a response to an action. */
+.callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 14px 16px;
+    border: 1px dashed var(--seam-strong);
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.22);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+}
+.callout svg { flex: none; margin-top: 2px; color: var(--ember); }
+.callout b { color: var(--text); font-weight: 600; }
+.callout.danger { border-color: rgba(240, 115, 106, 0.4); }
+.callout.danger svg { color: var(--bad); }
+
+.empty {
+    padding: 34px 24px;
+    border: 1px dashed var(--seam);
+    border-radius: var(--r);
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.92rem;
+}
+
+/* ----------------------------------------------------------------- rows */
+
+/* A list of things the server told us about: worlds to download, skins on
+   file. One line each, action on the right. */
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--seam);
+    border-radius: var(--r-sm);
+    background: var(--stone);
+    transition: border-color 0.16s ease, background 0.16s ease;
+}
+.row:hover { border-color: var(--seam-strong); background: var(--stone-lit); }
+
+.row-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.row-name strong {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.row-name .meta { font-size: 0.74rem; }
+
+/* Key/value readout — account data, server details. */
+.kv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 20px;
+    margin: 0;
+    font-size: 0.9rem;
+}
+.kv dt { color: var(--text-faint); }
+.kv dd { margin: 0; font-family: var(--mono); font-size: 0.85rem; overflow-wrap: anywhere; }
+
+/* ----------------------------------------------------------------- code */
+
+code, kbd, samp {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--seam);
+    color: var(--text);
+}
+
+pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    border: 1px solid var(--seam);
+    border-radius: var(--r-sm);
+    background: rgba(0, 0, 0, 0.4);
+}
+pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+/* ---------------------------------------------------------------- prose */
+
+/* Body copy that arrives as a block — the landing page pitch, the history
+   wiki rendered from Markdown. Everything inside is styled by element,
+   because the markup is not ours to add classes to. */
+.prose { max-width: var(--measure); }
+.prose > :first-child { margin-top: 0; }
+.prose > :last-child { margin-bottom: 0; }
+
+.prose p { margin: 0 0 1em; }
+.prose a { color: var(--flame); text-decoration: none; border-bottom: 1px solid var(--flame-edge); }
+.prose a:hover { border-bottom-color: var(--flame); }
+
+.prose h2 {
+    margin: 1.9em 0 0.5em;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+.prose h3 {
+    margin: 1.6em 0 0.4em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--flame);
+}
+.prose h4 { margin: 1.4em 0 0.3em; font-size: 0.98rem; font-weight: 700; }
+
+.prose ul, .prose ol { margin: 0 0 1em; padding-left: 0; }
+.prose ol { padding-left: 1.3em; }
+
+/* The flame tick from the old landing page, kept — it was the one piece of
+   that design worth carrying over. */
+.prose ul { list-style: none; }
+.prose ul li {
+    position: relative;
+    padding-left: 26px;
+    margin: 0.4em 0;
+}
+.prose ul li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.55em;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    background: linear-gradient(150deg, var(--flame), var(--ember));
+    box-shadow: 0 0 8px rgba(243, 156, 18, 0.4);
+}
+.prose ol li { margin: 0.4em 0; }
+
+.prose blockquote {
+    margin: 1em 0;
+    padding: 2px 0 2px 16px;
+    border-left: 3px solid var(--flame-edge);
+    color: var(--text-dim);
+}
+
+.prose hr {
+    border: 0;
+    border-top: 1px solid var(--seam);
+    margin: 2em 0;
+}
+
+.prose img { max-width: 100%; height: auto; border-radius: var(--r-sm); }
+
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 1em 0;
+}
+.prose th, .prose td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--seam);
+    text-align: left;
+}
+.prose th { color: var(--text-dim); font-weight: 600; }
+
+/* Links outside prose: quiet by default, flame on hover. */
+a { color: var(--flame); }
+
+/* ---------------------------------------------------------------- modal */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    place-items: center;
+    padding: 24px;
+    background: rgba(6, 8, 9, 0.72);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.modal[open], .modal.show { display: grid; }
+
+.modal-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 26px 28px;
+    border: 1px solid var(--seam-strong);
+    border-radius: var(--r);
+    background: linear-gradient(180deg, var(--stone-lit), var(--stone));
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.modal-card h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+.modal-card p  { margin: 0; font-size: 0.94rem; color: var(--text-dim); }
+
+/* ---------------------------------------------------------------- toast */
+
+#toast {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    z-index: 60;
+    transform: translate(-50%, 130%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(92vw, 480px);
+    padding: 12px 18px;
+    border: 1px solid var(--seam-strong);
+    border-radius: 999px;
+    background: rgba(20, 24, 26, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+    font-size: 0.9rem;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#toast.up { transform: translate(-50%, 0); }
+#toast .tick { color: var(--live); flex: none; }
+#toast.bad .tick { color: var(--bad); }
+
+/* --------------------------------------------------------------- footer */
+
+footer.page {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: 26px 24px 60px;
+    border-top: 1px solid var(--seam);
+    color: var(--text-faint);
+    font-size: 0.84rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+footer.page a {
+    color: var(--text-dim);
+    text-decoration: none;
+    border-bottom: 1px solid var(--seam-strong);
+}
+footer.page a:hover { color: var(--flame); border-color: var(--flame-edge); }
+
+/* ------------------------------------------------------------ utilities */
+
+.hidden { display: none !important; }
+.mono { font-family: var(--mono); }
+.dim { color: var(--text-dim); }
+.faint { color: var(--text-faint); }
+.center { text-align: center; }
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 720px) {
+    .bar { padding: 10px 14px; gap: 2px; }
+    .brand { margin-right: 12px; }
+    .brand span.name { display: none; }
+    main { padding: 36px 16px 72px; gap: 44px; }
+    .panel { padding: 18px 16px; }
+    .actions { flex-direction: column; align-items: stretch; }
+    .actions .btn { width: 100%; }
+    .row { flex-direction: column; align-items: stretch; gap: 12px; }
+    .row .btn { width: 100%; }
+    footer.page { padding: 22px 16px 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
 }

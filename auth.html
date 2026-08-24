@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Auth Redir</title>
-  <link rel="stylesheet" href="/main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <meta name="robots" content="noindex">
+    <title>BakoSMP - Redirecting</title>
+    <!-- Belt and braces: the meta refresh covers a visitor with JavaScript off,
+         who would otherwise sit on a page that never goes anywhere. -->
+    <meta http-equiv="refresh" content="0; url=/redir.html?from=auth">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/main.css">
+    <script>window.location.replace('/redir.html?from=auth');</script>
 </head>
 <body>
-  <script>window.location.href = "/redir?from=auth";</script>
+    <main>
+        <section class="intro">
+            <h1>Redirecting&hellip;</h1>
+            <p class="lead">
+                If nothing happens, <a href="/redir.html?from=auth">continue here</a>.
+            </p>
+        </section>
+    </main>
 </body>
 </html>

@@ -1,254 +1,231 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BakoSMP - Our History</title>
-    <link rel="stylesheet" href="main.css"/>
-    <script src="/js/events.js" defer></script>
-    <style>
-        #history-introbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1em;
-        }
-        #edit-btn {
-            background-color: #2980b9;
-            color: white;
-            border: none;
-        }
-        #history-editor {
-            display: none; /* Hidden by default */
-        }
-        #editor-textarea {
-            width: 100%;
-            min-height: 400px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        #editor-buttons {
-            margin-top: 1em;
-        }
-        #cancel-btn {
-            background-color: #e74c3c;
-            margin-left: 10px;
-        }
-
-        /* Custom Popup Modal Styles */
-        .popup-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            display: none; /* Hidden by default */
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .popup-content {
-            background: #2c3e50;
-            padding: 25px 35px;
-            border-radius: 8px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 400px;
-            width: 90%;
-        }
-        .popup-content h2 {
-            margin-top: 0;
-            color: #e74c3c; /* Red for error */
-        }
-        .popup-content #popup-ok-btn {
-            background-color: #3498db;
-        }
-    </style>
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Our history</title>
+    <meta name="description" content="The written history of the BakoSMP Minecraft server, season by season.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
     <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-    <div class="particles" id="particles-js"></div>
-    <div id="cookie-banner">
-        <p id="txt">This website uses cookies to ensure you get the best experience.</p>
-        <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
-        <button id="cookie-ok">OK</button>
-    </div>
-    <div class="topbar">
-        <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-        <span class="title">BakoSMP</span>
-        <a class="title" href="/index.html" style="margin-left: 2em;">Home</a>
-        <a class="title" href="/uploads.html" style="margin-left: 2em;">Uploads</a>
-        <a class="title" href="/auth.html" style="margin-left: 2em;">Authentication</a>
-        <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-        <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-    </div>
-    <div class="content">
-        <!-- Topbar-ish section first, all in the same row-->
-         <div id="history-introbar">
-            <h1 id="page-title">Our History</h1>
-            <button id="edit-btn" style="display: none;">Edit</button>
-            <h3 id="last-edited">Last edited: <span id="last-edited-date"></span></h3>
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html" aria-current="page">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Since season one</span>
+        <h1 id="pageTitle">Our history</h1>
+        <p class="lead">
+            Eight seasons of building, griefing, rebuilding and arguing about it
+            afterwards &mdash; written down by the people who were there.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>The wiki</h2>
+            <span class="tally" id="lastEdited"></span>
+            <span class="spacer"></span>
+            <button class="btn btn-quiet btn-sm" id="editBtn" hidden>Edit</button>
         </div>
-        <div id="history-wiki">
-            <!-- Markdown wiki content from api -->
+
+        <div class="panel" id="viewPanel">
+            <div class="prose" id="wiki">
+                <p class="faint">Loading&hellip;</p>
+            </div>
         </div>
-        <div id="history-editor">
-            <textarea id="editor-textarea"></textarea>
-            <div id="editor-buttons"></div>
-            <p id="edit-message" style="margin-top: 1em;"></p>
+
+        <div class="panel lit" id="editPanel" hidden>
+            <p class="panel-desc">Markdown. It is rendered and sanitised before anyone sees it.</p>
+            <textarea id="editor" aria-label="History wiki source"></textarea>
+            <div class="actions">
+                <button class="btn btn-primary" id="saveBtn" type="button">Save changes</button>
+                <button class="btn btn-quiet" id="cancelBtn" type="button">Cancel</button>
+            </div>
+            <p class="note" id="editNote" role="status"></p>
+        </div>
+    </section>
+</main>
+
+<div class="modal" id="errorModal" role="dialog" aria-modal="true" aria-labelledby="errorTitle">
+    <div class="modal-card">
+        <h2 id="errorTitle">Save failed</h2>
+        <p id="errorMessage">An unexpected error occurred.</p>
+        <div class="actions">
+            <button class="btn btn-quiet" id="errorOk" type="button">OK</button>
         </div>
     </div>
+</div>
 
-    <!-- Error Popup Modal go brr -->
-    <div id="error-popup" class="popup-overlay">
-        <div class="popup-content">
-            <h2>Save Failed</h2>
-            <p id="popup-message">An unexpected error occurred.</p>
-            <button id="popup-ok-btn">OK</button>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="/js/cookies.js"></script>
-    <script src="/particles.js"></script>
-    <script src="/js/genFP.js"></script>
-    <script>
-        let rawMarkdown = ''; // Store the raw markdown content for editing
-        const popupOkBtn = document.getElementById('popup-ok-btn');
-        const popupMessage = document.getElementById('popup-message');
-        const errorPopup = document.getElementById('error-popup');
-        document.addEventListener('DOMContentLoaded', async () => {
-            const wikiContainer = document.getElementById('history-wiki');
-            const editorContainer = document.getElementById('history-editor');
-            const editorTextarea = document.getElementById('editor-textarea');
-            const editorButtons = document.getElementById('editor-buttons');
-            const editMessage = document.getElementById('edit-message');
-            const editButton = document.getElementById('edit-btn');
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
 
-            // 1. Check user role to show/hide edit button
-            try {
-                const profileRes = await fetch('/api/account-status', { method: 'GET', credentials: 'include' });
-                if (profileRes.ok) {
-                    const profileData = await profileRes.json();
-                    if (profileData.is_og || profileData.is_admin) {
-                        editButton.style.display = 'block';
-                    }
-                }
-            } catch (err) {
-                console.error("Couldn't check admin status:", err);
-            }
-            
-            // 2. Fetch and render the history content
-            try {
-                const response = await fetch('/api/history/wiki/view', { method: 'GET', credentials: 'include' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const json = await response.json();
-                const markdown = json.content;
-                const lastEdited = json.updated_at;
-                // convert lastEdited to Date from ISO string and format it nicely
-                const formattedDate = new Date(lastEdited).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' });
-                document.getElementById('last-edited-date').textContent = formattedDate;
-                rawMarkdown = markdown; // Store for editing
+<div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+</div>
 
-                // Convert Markdown to HTML using marked.js
-                const rawHtml = marked.parse(markdown);
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+<script src="/js/toast.js"></script>
+<script>
+/* ---------------------------------------------------------------------------
+   The wiki is one Markdown document the server hands back, rendered with marked
+   and then run through DOMPurify — it is edited by humans with admin rights,
+   which is exactly the case where sanitising matters.
 
-                // Sanitize the HTML with DOMPurify to prevent XSS attacks
-                const cleanHtml = DOMPurify.sanitize(rawHtml);
+   Staff see an Edit button. Everyone else never learns it exists.
+--------------------------------------------------------------------------- */
 
-                wikiContainer.innerHTML = cleanHtml;
-            } catch (error) {
-                console.error('Error fetching or rendering history:', error);
-                wikiContainer.innerHTML = '<p style="color: red;">Could not load history content. Please try again later.</p>';
-            }
-        });
+let source = '';   // the raw Markdown, kept so Edit opens what is actually stored
 
-        // 3. Edit functionality
-        document.getElementById('edit-btn').addEventListener('click', () => {
-            const wikiContainer = document.getElementById('history-wiki');
-            const editorContainer = document.getElementById('history-editor');
-            const editorTextarea = document.getElementById('editor-textarea');
-            const editorButtons = document.getElementById('editor-buttons');
-            const editButton = document.getElementById('edit-btn');
-            const pageTitle = document.getElementById('page-title');
-            const lastEdited = document.getElementById('last-edited');
-            // Switch to edit mode
-            wikiContainer.style.display = 'none';
-            editorContainer.style.display = 'block';
-            editButton.style.display = 'none';
-            pageTitle.textContent = 'Editing History';
+const wiki       = document.getElementById('wiki');
+const viewPanel  = document.getElementById('viewPanel');
+const editPanel  = document.getElementById('editPanel');
+const editor     = document.getElementById('editor');
+const editBtn    = document.getElementById('editBtn');
+const editNote   = document.getElementById('editNote');
+const pageTitle  = document.getElementById('pageTitle');
+const modal      = document.getElementById('errorModal');
 
+function render(markdown) {
+    wiki.innerHTML = DOMPurify.sanitize(marked.parse(markdown));
+}
 
-            // Populate textarea and create buttons
-            editorTextarea.value = rawMarkdown;
-            editorButtons.innerHTML = `
-                <button id="save-btn">Save Changes</button>
-                <button id="cancel-btn">Cancel</button>
-            `;
+function showError(message) {
+    document.getElementById('errorMessage').textContent = message;
+    modal.classList.add('show');
+}
 
-             // --- Event listeners for new buttons ---
-             document.getElementById('save-btn').addEventListener('click', async () => {
-                 const newMarkdown = editorTextarea.value;
-                 const editMessage = document.getElementById('edit-message');
-                 editMessage.textContent = 'Saving...';
-                 editMessage.style.color = '#ccc';
- 
-                 try {
-                     const res = await fetch('/api/history/wiki/edit', {
-                         method: 'PATCH',
-                         credentials: 'include',
-                         headers: { 'Content-Type': 'application/json' },
-                         body: JSON.stringify({ edited_content: newMarkdown })
-                     });
- 
-                     if (!res.ok) throw new Error(`Save failed: ${res.statusText}`);
- 
-                     // Update content and switch back to view mode
-                     rawMarkdown = newMarkdown;
-                     wikiContainer.innerHTML = DOMPurify.sanitize(marked.parse(newMarkdown));
-                     switchToViewMode();
-                     editMessage.textContent = '';
- 
-                 } catch (error) {
-                     console.error('Error saving history:', error);
-                     editMessage.textContent = ''; // Clear 'Saving...' message
-                     showErrorPopup('Could not save the content. The server might be down or you may not have permission. Please try again later.');
-                 }
-             });
- 
-             document.getElementById('cancel-btn').addEventListener('click', () => {
-                 switchToViewMode();
-             });
-        });
+document.getElementById('errorOk').addEventListener('click', function () {
+    modal.classList.remove('show');
+});
+modal.addEventListener('click', function (event) {
+    if (event.target === modal) { modal.classList.remove('show'); }
+});
 
-        function switchToViewMode() {
-            document.getElementById('history-wiki').style.display = 'block';
-            document.getElementById('history-editor').style.display = 'none';
-            document.getElementById('edit-btn').style.display = 'block';
-            document.getElementById('page-title').textContent = 'Our History';
+/* --- load --------------------------------------------------------------- */
+
+document.addEventListener('DOMContentLoaded', async function () {
+    // Whether to offer editing at all. A failure here just means no button.
+    try {
+        const response = await fetch('/api/account-status', { method: 'GET', credentials: 'include' });
+        if (response.ok) {
+            const me = await response.json();
+            if (me.is_og || me.is_admin) { editBtn.hidden = false; }
         }
+    } catch (err) {
+        console.debug('Could not check editing rights:', err);
+    }
 
-        function showErrorPopup(message) {
-            popupMessage.textContent = message;
-            errorPopup.style.display = 'flex';
+    try {
+        const response = await fetch('/api/history/wiki/view', { method: 'GET', credentials: 'include' });
+        if (!response.ok) { throw new Error('HTTP ' + response.status); }
+
+        const data = await response.json();
+        source = data.content || '';
+        render(source);
+
+        const edited = new Date(data.updated_at);
+        if (!isNaN(edited.getTime())) {
+            document.getElementById('lastEdited').textContent =
+                'last edited ' + edited.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
         }
+    } catch (err) {
+        console.error('Could not load the history:', err);
+        wiki.innerHTML = '';
+        const note = document.createElement('p');
+        note.className = 'note bad';
+        note.textContent = 'Could not load the history. Refresh to try again.';
+        wiki.appendChild(note);
+    }
+});
 
-        popupOkBtn.addEventListener('click', () => {
-            errorPopup.style.display = 'none';
+/* --- edit --------------------------------------------------------------- */
+
+function toView() {
+    viewPanel.hidden = false;
+    editPanel.hidden = true;
+    editBtn.hidden = false;
+    pageTitle.textContent = 'Our history';
+    editNote.textContent = '';
+    editNote.className = 'note';
+}
+
+editBtn.addEventListener('click', function () {
+    editor.value = source;
+    viewPanel.hidden = true;
+    editPanel.hidden = false;
+    editBtn.hidden = true;
+    pageTitle.textContent = 'Editing history';
+    editor.focus();
+});
+
+document.getElementById('cancelBtn').addEventListener('click', toView);
+
+document.getElementById('saveBtn').addEventListener('click', async function () {
+    const button = this;
+    const edited = editor.value;
+
+    editNote.textContent = 'Saving\u2026';
+    editNote.className = 'note busy';
+    button.disabled = true;
+
+    try {
+        const response = await fetch('/api/history/wiki/edit', {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ edited_content: edited })
         });
+        if (!response.ok) { throw new Error('HTTP ' + response.status); }
 
-    </script>
+        source = edited;
+        render(source);
+        toView();
+        toast('History saved');
+    } catch (err) {
+        console.error('Could not save the history:', err);
+        editNote.textContent = '';
+        editNote.className = 'note';
+        showError('Could not save. The server may be down, or you may not have permission any more.');
+    } finally {
+        button.disabled = false;
+    }
+});
+</script>
 </body>
 </html>

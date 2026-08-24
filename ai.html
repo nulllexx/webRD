@@ -1,41 +1,102 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BakoSMP - AI Experiments</title>
-    <script src="/restrictDev.js"></script>
-    <link rel="stylesheet" href="main.css" type="text/css">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - AI experiments</title>
+    <meta name="description" content="Experimental AI features for BakoSMP.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
     <link rel="stylesheet" href="/cookie.css">
-    <script src="/js/cookies.js"></script>
     <script src="/js/events.js" defer></script>
+    <script src="/restrictDev.js"></script>
 </head>
 <body>
-    <div class="particles" id="particles-js"></div>
-    <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Experimental</span>
+        <h1>AI experiments</h1>
+        <p class="lead">
+            Things we are trying out. Nothing on this page is finished, and none of it
+            is load-bearing &mdash; if something here breaks, the server is fine.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Support chatbot</h2>
+            <span class="tally" id="botState">offline</span>
+        </div>
+        <div class="panel">
+            <p class="panel-desc">
+                Meant to answer the questions people ask in Discord every week: how to
+                join, why a skin will not apply, what happens at the end of a season.
+            </p>
+
+            <form id="botForm" class="actions grow">
+                <input type="text" id="botInput" placeholder="Ask me anything&hellip;" aria-label="Your question" required>
+                <button class="btn btn-primary" type="submit">Ask</button>
+            </form>
+
+            <div class="panel sunk" id="botAnswer">
+                <p class="dim" id="botText">Ask your question to get a response.</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <h1 style="text-align: center;">AI Experiments</h1>
-    <h2>Support chatbot</h2>
-    <form id="support-bot">
-        <input type="text" id="user-input" placeholder="Ask me anything..." required>
-        <button class="aibtn" type="submit">Ask</button>
-    </form>
-    <div id="support-response-div" style="width: 75%; height: 20%; border-radius: 16px; background-color: rgba(57, 57, 57, 0.717); padding: 1em; margin-top: 1em; overflow-y: auto; border-color: gray; margin: auto;">
-        <p style="word-wrap: break-word;" id="support-text">Ask your question to get a response.</p>
-    </div>
-  </div>
-  <script src="/js/genFP.js"></script>
+</div>
+
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script>
+/* The bot has no endpoint behind it yet. Say so, rather than letting the form
+   submit itself into a page reload that looks like the answer got lost. */
+document.getElementById('botForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const answer = document.getElementById('botText');
+    answer.className = '';
+    answer.textContent = 'The support bot is not connected yet. Ask in ' +
+        'Discord in the meantime \u2014 somebody there will know.';
+});
+</script>
 </body>
 </html>

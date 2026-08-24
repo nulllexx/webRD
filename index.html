@@ -1,514 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Home</title>
-  <link rel="stylesheet" href="main.css"/>
-  <style>
-    /* Enhanced Background Animation */
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            25% { background-position: 50% 25%; }
-            50% { background-position: 100% 50%; }
-            75% { background-position: 50% 75%; }
-            100% { background-position: 0% 50%; }
-        }
-        .logo {
-            height: 40px;
-            margin-right: 15px;
-            animation: pulse 3s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .title {
-            font-size: 22px;
-            font-weight: bold;
-            background: linear-gradient(45deg, #f39c12, #e74c3c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: titleGlow 4s infinite;
-        }
-
-        @keyframes titleGlow {
-            0% { text-shadow: 0 0 5px rgba(243, 156, 18, 0.5); }
-            50% { text-shadow: 0 0 20px rgba(243, 156, 18, 0.8); }
-            100% { text-shadow: 0 0 5px rgba(243, 156, 18, 0.5); }
-        }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Content Section with Enhancements */
-        .content {
-            margin-top: 100px;
-            padding: 40px;
-            text-align: left;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(30px);
-            opacity: 0;
-            animation: slideUp 1s ease-out forwards 0.3s;
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h2 {
-            font-size: 28px;
-            color: #f39c12;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            position: relative;
-            display: inline-block;
-        }
-
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 3px;
-            background: #f39c12;
-            animation: lineExpand 1.5s ease-out forwards 1s;
-        }
-
-        @keyframes lineExpand {
-            to { width: 100%; }
-        }
-
-        h3 {
-            font-size: 22px;
-            color: #f39c12;
-            margin-top: 30px;
-            transform: translateX(-20px);
-            opacity: 0;
-            animation: slideRight 0.8s ease-out forwards 1.2s;
-        }
-
-        @keyframes slideRight {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        p {
-            font-size: 18px;
-            margin: 15px 0;
-            opacity: 0;
-            animation: fadeInText 0.8s ease-out forwards;
-            animation-delay: calc(1.3s + var(--delay, 0s));
-        }
-
-        p:nth-child(2) { --delay: 0.1s; }
-        p:nth-child(3) { --delay: 0.2s; }
-        p:nth-child(4) { --delay: 0.3s; }
-        p:nth-child(5) { --delay: 0.4s; }
-
-        @keyframes fadeInText {
-            to { opacity: 1; }
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        ul li {
-            font-size: 18px;
-            margin: 8px 0;
-            padding-left: 30px;
-            position: relative;
-            opacity: 0;
-            transform: translateX(-20px);
-            animation: listItem 0.5s ease-out forwards;
-            animation-delay: calc(1.5s + var(--item-delay, 0s));
-        }
-
-        ul li:nth-child(1) { --item-delay: 0s; }
-        ul li:nth-child(2) { --item-delay: 0.15s; }
-        ul li:nth-child(3) { --item-delay: 0.3s; }
-        ul li:nth-child(4) { --item-delay: 0.45s; }
-        ul li:nth-child(5) { --item-delay: 0.6s; }
-        ul li:nth-child(6) { --item-delay: 0.75s; }
-        ul li:nth-child(7) { --item-delay: 0.9s; }
-
-        @keyframes listItem {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        ul li::before {
-            content: "✔";
-            position: absolute;
-            left: 0;
-            color: #f39c12;
-            animation: checkmark 0.3s ease-out forwards;
-            transform: scale(0);
-            animation-delay: calc(2s + var(--item-delay, 0s));
-        }
-
-        @keyframes checkmark {
-            50% { transform: scale(1.5); }
-            100% { transform: scale(1); }
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 12px 25px;
-            margin-top: 30px;
-            background: linear-gradient(45deg, #f39c12, #e67e22);
-            color: #000;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: buttonAppear 0.8s ease-out forwards 2.5s;
-        }
-
-        @keyframes buttonAppear {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.6);
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
-            z-index: -1;
-        }
-
-        .cta-button:hover::before {
-            left: 100%;
-            animation: shine 1.5s infinite;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .email {
-            color: #3498db;
-            position: relative;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .email::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: #3498db;
-            transition: width 0.3s ease;
-        }
-
-        .email:hover {
-            color: #2980b9;
-        }
-
-        .email:hover::after {
-            width: 100%;
-        }
-
-        .discord-link {
-            color: #7289da;
-            text-decoration: none;
-            font-weight: bold;
-            position: relative;
-            transition: color 0.3s;
-        }
-
-        .discord-link::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #7289da;
-            transition: width 0.3s ease;
-        }
-
-        .discord-link:hover {
-            color: #5e73bc;
-        }
-
-        .discord-link:hover::after {
-            width: 100%;
-        }
-
-        /* Particles Background */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* Scroll Indicator */
-        .scroll-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 50px;
-            border: 2px solid #f39c12;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            opacity: 0;
-            animation: scrollAppear 1s forwards 3s;
-        }
-
-        @keyframes scrollAppear {
-            to { opacity: 0.7; }
-        }
-
-        .scroll-indicator::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #f39c12;
-            border-radius: 50%;
-            margin-top: 8px;
-            animation: scrollAnim 2s infinite;
-        }
-
-        @keyframes scrollAnim {
-            0% { transform: translateY(0); opacity: 1; }
-            80% { transform: translateY(20px); opacity: 0; }
-            81% { transform: translateY(0); opacity: 0; }
-            100% { opacity: 1; }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .content {
-                padding: 20px;
-                margin-top: 80px;
-            }
-
-            .title {
-                font-size: 18px;
-            }
-
-            h2 {
-                font-size: 24px;
-            }
-
-            h3 {
-                font-size: 18px;
-            }
-
-            p {
-                font-size: 16px;
-            }
-
-            .scroll-indicator {
-                display: none;
-            }
-        }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Home</title>
+    <meta name="description" content="BakoSMP is a Minecraft survival multiplayer server with a fresh world every 2-3 months, custom plugins, and support for cracked Java clients.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index.html" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads.html" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/auth.html" style="margin-left: 2em;">Authentication</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div class="content">
-        <h2>BakoSMP - A Minecraft SMP for Everyone</h2>
-        <p><strong>SEASON 8 IS HERE!</strong></p>
-        <p>Have you ever wanted to play Minecraft multiplayer but struggled to find a server that truly fits your needs? Maybe you tried big servers like Hypixel and got bored, or you searched for SMPs and only found inactive or uninspired options?</p>
-        <p>Look no further - this is the server for you!</p>
-        <p>BakoSMP is a Minecraft survival multiplayer server that aims to provide a fun and engaging experience for all players. We offer a variety of features and activities to keep you entertained, including:</p>
-        <ul>
-            <li>Our unique Seasons Update ensures fresh gameplay every 2-3 months with a brand-new world. Each season introduces something different—be it new mods, plugins, or even a pure vanilla experience, keeping things exciting for all players.</li>
-        </ul>
+<canvas id="embers" aria-hidden="true"></canvas>
 
-        <h3>Why join BakoSMP?</h3>
-        <ul>
-            <li>A welcoming and active community</li>
-            <li>Custom plugins and features</li>
-            <li>Events and competitions</li>
-            <li>Active and dedicated staff</li>
-            <li>Regular updates and improvements</li>
-            <li>Compatibility with cracked Minecraft (Java Edition Only)</li>
-            <li>And much more!</li>
-        </ul>
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html" aria-current="page">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
 
-        <p>Join our <a href="https://discord.gg/DMx3m54waD" target="_blank" class="discord-link">Discord server</a> to get started! It's required to access the Minecraft server, and it's where we keep everyone updated on news and events.</p>
+<main>
+    <section class="intro">
+        <span class="eyebrow">Season 8 &middot; Live now</span>
+        <h1>A Minecraft SMP for everyone</h1>
+        <p class="lead">
+            Ever wanted to play multiplayer and failed to find a server that fits?
+            The big ones wear thin after a week, and searching for an SMP mostly turns
+            up dead worlds. BakoSMP is the other thing: a survival server small enough
+            to feel like somewhere, run by people who are still here.
+        </p>
+        <span class="assurance">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+            </svg>
+            <span><strong>Java Edition, cracked clients included.</strong> Joining is free; the Discord is the front door.</span>
+        </span>
+        <div class="actions">
+            <a class="btn btn-primary" href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Join our Discord</a>
+            <a class="btn btn-quiet" href="/downloads.html">Browse world downloads</a>
+        </div>
+    </section>
 
-        <p><strong>Convinced?</strong> Join BakoSMP and experience Minecraft Multiplayer the way it's meant to be played!</p>
+    <section class="section">
+        <div class="section-head">
+            <h2>Why here</h2>
+            <span class="tally">six reasons</span>
+        </div>
+        <div class="grid">
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><path d="M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8"></path><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                <h3>A community, not a lobby</h3>
+                <p>Small enough that people know each other, active enough that the world keeps changing while you are away.</p>
+            </div>
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg></span>
+                <h3>Custom plugins and features</h3>
+                <p>Written for this server rather than bought off a marketplace, so they fit how people here actually play.</p>
+            </div>
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"></path><path d="M12 17v4"></path><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"></path><path d="M17 5h3v2a3 3 0 0 1-3 3"></path><path d="M7 5H4v2a3 3 0 0 0 3 3"></path></svg></span>
+                <h3>Events and competitions</h3>
+                <p>Build contests, races and one-off chaos, announced in Discord and voted on by whoever turns up.</p>
+            </div>
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg></span>
+                <h3>Staff who are actually around</h3>
+                <p>Griefing and rollbacks get handled the same day, not whenever somebody next logs in.</p>
+            </div>
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg></span>
+                <h3>Regular updates</h3>
+                <p>Version bumps, plugin fixes and quality-of-life changes ship continuously, not once a season.</p>
+            </div>
+            <div class="feature">
+                <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path></svg></span>
+                <h3>Cracked clients welcome</h3>
+                <p>Java Edition only. You do not need to have bought the game to play here — you do need our Discord.</p>
+            </div>
+        </div>
+    </section>
 
-        <p>For any questions, feel free to email us: <a href="mailto:thisisformehello@gmail.com" class="email">thisisformehello@gmail.com</a></p>
-        <p>BakoSMP is hosted locally by BakoPlayz on <strong>SERVER@bakosmp.go.ro</strong></p>
+    <section class="section">
+        <div class="section-head">
+            <h2>Seasons</h2>
+            <span class="tally">every 2&ndash;3 months</span>
+        </div>
+        <div class="panel lit">
+            <div class="panel-top">
+                <span class="state live"><i class="dot"></i>Season 8 running</span>
+                <span class="meta">world reset every 2&ndash;3 months</span>
+            </div>
+            <h3 class="panel-title">A new world before the old one gets boring</h3>
+            <p class="panel-desc">
+                Every season wipes the map and brings something different with it &mdash;
+                new mods one time, a different plugin set the next, occasionally pure
+                vanilla. Nobody arrives six months late to a world where everything worth
+                doing has already been done.
+            </p>
+            <div class="actions">
+                <a class="btn btn-quiet btn-sm" href="/downloads.html">Download past seasons</a>
+                <a class="btn btn-quiet btn-sm" href="/history.html">Read what happened in them</a>
+            </div>
+        </div>
+    </section>
 
-        <a href="https://discord.gg/DMx3m54waD" class="cta-button" target="_blank">Join Our Discord</a>
-    </div>
+    <section class="section">
+        <div class="section-head">
+            <h2>Getting in</h2>
+            <span class="tally">three steps</span>
+        </div>
+        <div class="panel">
+            <div class="prose">
+                <ol>
+                    <li>Join the <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord server</a>. It is required &mdash; the whitelist and every announcement live there.</li>
+                    <li>Ask for whitelisting in the right channel. Someone will get to it.</li>
+                    <li>Point your Java client at <code>SERVER@bakosmp.go.ro</code> and start digging.</li>
+                </ol>
+            </div>
+            <div class="callout">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+                <span><b>An account on this site is separate.</b> You only need one for skin uploads, polls and settings &mdash; not to play.</span>
+            </div>
+        </div>
+    </section>
 
-    <!-- Scroll Indicator -->
-    <div class="scroll-indicator"></div>
+    <section class="section">
+        <div class="section-head">
+            <h2>Around the site</h2>
+        </div>
+        <div class="grid">
+            <a class="feature" href="/uploads.html">
+                <h3>Skin uploads</h3>
+                <p>Put a custom skin on your account, see what you have uploaded, remove the ones you are done with.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+            <a class="feature" href="/downloads.html">
+                <h3>World downloads</h3>
+                <p>Every archived season, packaged and ready to open in single-player.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+            <a class="feature" href="/polls.html">
+                <h3>Polls</h3>
+                <p>Decisions that shape the server get made here rather than by whoever shouts loudest in chat.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+            <a class="feature" href="/history.html">
+                <h3>Our history</h3>
+                <p>Eight seasons of it, written down by the people who were there.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+            <a class="feature" href="/storage/">
+                <h3>Data storage</h3>
+                <p>Shared files, server assets and player content.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+            <a class="feature" href="/raindrippy/">
+                <h3>RainDrippy</h3>
+                <p>The software side: the projects, the public API and the service status page.</p>
+                <span class="go">Open &rarr;</span>
+            </a>
+        </div>
+    </section>
 
-    <!-- Particle.js for background particles -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script>
-        // Initialize particles
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof particlesJS !== 'undefined') {
-                particlesJS("particles-js", {
-                    "particles": {
-                        "number": {
-                            "value": 80,
-                            "density": {
-                                "enable": true,
-                                "value_area": 800
-                            }
-                        },
-                        "color": {
-                            "value": "#f39c12"
-                        },
-                        "shape": {
-                            "type": "circle",
-                        },
-                        "opacity": {
-                            "value": 0.5,
-                            "random": true
-                        },
-                        "size": {
-                            "value": 3,
-                            "random": true
-                        },
-                        "line_linked": {
-                            "enable": true,
-                            "distance": 150,
-                            "color": "#ffffff",
-                            "opacity": 0.2,
-                            "width": 1
-                        },
-                        "move": {
-                            "enable": true,
-                            "speed": 2,
-                            "direction": "none",
-                            "random": true,
-                            "straight": false,
-                            "out_mode": "out",
-                            "bounce": false
-                        }
-                    },
-                    "interactivity": {
-                        "detect_on": "canvas",
-                        "events": {
-                            "onhover": {
-                                "enable": true,
-                                "mode": "grab"
-                            },
-                            "onclick": {
-                                "enable": true,
-                                "mode": "push"
-                            },
-                            "resize": true
-                        },
-                        "modes": {
-                            "grab": {
-                                "distance": 140,
-                                "line_linked": {
-                                    "opacity": 0.6
-                                }
-                            },
-                            "push": {
-                                "particles_nb": 4
-                            }
-                        }
-                    },
-                    "retina_detect": true
-                });
-            }
-            
-            // Hide scroll indicator when scrolled
-            window.addEventListener('scroll', function() {
-                const scrollIndicator = document.querySelector('.scroll-indicator');
-                if (window.scrollY > 100 && scrollIndicator) {
-                    scrollIndicator.style.opacity = '0';
-                    scrollIndicator.style.transition = 'opacity 0.5s';
-                }
-            });
-            
-            // Add reveal animations on scroll
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.animation = 'none';
-                        entry.target.offsetHeight; // Trigger reflow
-                        entry.target.style.animation = null;
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.1
-            });
-            
-            document.querySelectorAll('h3, p, ul li').forEach(el => {
-                observer.observe(el);
-            });
-        });
-    </script>
+    <section class="section">
+        <div class="section-head">
+            <h2>Contact</h2>
+        </div>
+        <div class="panel">
+            <dl class="kv">
+                <dt>Server</dt>
+                <dd>SERVER@bakosmp.go.ro</dd>
+                <dt>Hosting</dt>
+                <dd>locally, by BakoPlayz</dd>
+                <dt>Email</dt>
+                <dd><a href="mailto:thisisformehello@gmail.com">thisisformehello@gmail.com</a></dd>
+                <dt>Discord</dt>
+                <dd><a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">discord.gg/DMx3m54waD</a></dd>
+            </dl>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
+    <p id="txt">This website uses cookies to ensure you get the best experience.</p>
+    <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
+    <button id="cookie-ok">OK</button>
+</div>
+
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
 </body>
 </html>

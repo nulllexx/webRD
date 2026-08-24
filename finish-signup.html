@@ -1,125 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Finish Signup</title>
-  <link rel="stylesheet" href="/main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-
-    .section {
-      padding-top: 2em;
-      margin-top: -2em;
-    }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Finish signup</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="/main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="/index" style="margin-left: 2em;">Home</a>
-    <a class="title" href="/uploads" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="/storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="/raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Almost there</span>
+        <h1>One more step</h1>
+        <p class="lead">
+            Google has told us who you are. Pick the name you want to be known by here
+            and the account is yours.
+        </p>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Choose a username</h2>
+        </div>
+        <div class="panel lit">
+            <form id="finishForm" class="stack">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+                    <p class="hint">Use your Minecraft name if you want skin uploads to line up.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">Create account</button>
+                </div>
+                <p class="note" id="finishNote" role="status"></p>
+            </form>
+            <p class="hint">By using our services you agree to the <a href="/raindrippy/privacy-policy">Privacy Policy</a>.</p>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <section id="finish-signup" class="section">
-      <h1>One more step</h1>
-      <p style="margin-top: 2em;">You're almost in! Pick a username to finish creating your BakoSMP account.</p>
-      <form id="finishSignupForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required autocomplete="username" />
-        <br />
-        <br />
-        <button type="submit">Create account</button>
-        <p id="finishMessage" style="margin-top: 1em;"></p>
-      </form>
-      <p style="margin-top: 1em;">By using our services, you agree to the <a href="/raindrippy/privacy-policy.html">Privacy Policy</a>.</p>
-    </section>
-    <script>
-      function generateDeviceFingerprint() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('Device fingerprint', 2, 2);
+</div>
 
-        const fingerprint = [
-          navigator.userAgent,
-          navigator.language,
-          screen.width + 'x' + screen.height,
-          new Date().getTimezoneOffset(),
-          navigator.hardwareConcurrency || 'unknown',
-          canvas.toDataURL()
-        ].join('|');
-        canvas.style.display = 'none';
-        let hwid = btoa(fingerprint).substring(0, 32);
-        return hwid;
-      }
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script>
+function say(note, message, kind) {
+    note.textContent = message;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+}
 
-      document.getElementById('finishSignupForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+document.getElementById('finishForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-        const username = document.getElementById('username').value;
-        const hwid = generateDeviceFingerprint();
-        const messageElement = document.getElementById('finishMessage');
+    const note = document.getElementById('finishNote');
+    const button = event.target.querySelector('button[type="submit"]');
 
-        messageElement.textContent = 'Creating your account...';
-        messageElement.style.color = '#ccc';
+    say(note, 'Creating your account\u2026', 'busy');
+    button.disabled = true;
 
-        fetch('https://bakosmp.go.ro/api/auth/oauth/google/complete', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ username, hwid })
+    fetch('/api/auth/oauth/google/complete', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: document.getElementById('username').value,
+            hwid: window.deviceFingerprint()
         })
-        .then(async response => {
-          const data = await response.json().catch(() => ({}));
+    })
+    .then(async function (response) {
+        const data = await response.json().catch(function () { return {}; });
 
-          if (response.status === 200) {
-            messageElement.textContent = 'Account created! Redirecting...';
-            messageElement.style.color = 'green';
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 1500);
-          } else if (response.status === 409) {
-            messageElement.textContent = 'That username is taken. Please try another.';
-            messageElement.style.color = 'red';
-          } else if (response.status === 401) {
-            messageElement.textContent = 'Your sign-in session expired. Please sign in with Google again.';
-            messageElement.style.color = 'red';
-            setTimeout(() => {
-              window.location.href = '/login.html';
-            }, 2500);
-          } else {
-            messageElement.textContent = 'Could not finish signup: ' + (data.message || 'Unknown error');
-            messageElement.style.color = 'red';
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          messageElement.textContent = 'A network error occurred. Please try again.';
-          messageElement.style.color = 'red';
-        });
-      });
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="particles.js"></script>
-    <script src="/js/genFP.js"></script>
-  </div>
+        if (response.status === 200) {
+            say(note, 'Account created. Taking you in\u2026', 'ok');
+            setTimeout(function () { window.location.href = '/index.html'; }, 1400);
+        } else if (response.status === 409) {
+            say(note, 'That username is taken. Try another.', 'bad');
+            button.disabled = false;
+        } else if (response.status === 401) {
+            say(note, 'Your sign-in expired. Starting again with Google\u2026', 'bad');
+            setTimeout(function () { window.location.href = '/login.html'; }, 2400);
+        } else {
+            say(note, data.message || 'Could not finish signing up.', 'bad');
+            button.disabled = false;
+        }
+    })
+    .catch(function () {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+        button.disabled = false;
+    });
+});
+</script>
 </body>
 </html>

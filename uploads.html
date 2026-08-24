@@ -1,240 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BakoSMP - Skin uploads</title>
-  <link rel="stylesheet" href="main.css"/>
-  <link rel="stylesheet" href="/cookie.css">
-  <style>
-    .view-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    #result-view-overlay {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 100%;
-      margin-left: 10px;
-      background: #fff;
-      color: #000;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 1em;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      width: 200px;
-      z-index: 1000;
-    }
-
-    #result-view-overlay h2,
-    #result-view-overlay ul {
-      color: #000;
-    }
-
-    #result-view-overlay button#closePopup {
-      background: transparent;
-      color: black;
-      border: none;
-      font-size: 1.5rem;
-      position: absolute;
-      top: 8px; right: 8px;
-      cursor: pointer;
-      z-index: 1001;
-    }
-  </style>
-  <script src="/js/events.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0C0E0F">
+    <title>BakoSMP - Skin uploads</title>
+    <meta name="description" content="Upload, list and delete custom Minecraft skins on your BakoSMP account.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&amp;display=swap">
+    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="/cookie.css">
+    <script src="/js/events.js" defer></script>
 </head>
 <body>
-  <div class="particles" id="particles-js"></div>
-  <div class="topbar">
-    <img src="main.png" alt="BakoSMP Logo" class="logo" />
-    <span class="title">BakoSMP</span>
-    <a class="title" href="index.html" style="margin-left: 2em;">Home</a>
-    <a class="title" href="uploads.html" style="margin-left: 2em;">Uploads</a>
-    <a class="title" href="storage/" style="margin-left: 2em;">Data storage</a>
-    <a class="title" href="raindrippy/" style="margin-left: 2em;">RainDrippy</a>
-  </div>
-  <div id="cookie-banner">
+<canvas id="embers" aria-hidden="true"></canvas>
+
+<header class="bar">
+    <a class="brand" href="/index.html"><img src="/main.png" alt="" class="logo"><span class="name">BakoSMP</span></a>
+    <nav aria-label="Main">
+            <a class="nav" href="/index.html">Home</a>
+            <a class="nav" href="/uploads.html" aria-current="page">Uploads</a>
+            <a class="nav" href="/downloads.html">Downloads</a>
+            <a class="nav" href="/history.html">History</a>
+            <a class="nav" href="/polls.html">Polls</a>
+            <a class="nav" href="/storage/">Storage</a>
+            <a class="nav" href="/raindrippy/">RainDrippy</a>
+    </nav>
+    <span class="spacer"></span>
+    <a class="who" id="who" href="/settings.html" hidden><span class="head"></span>Signed in as <strong id="who-name"></strong></a>
+    <a class="btn btn-quiet btn-sm" id="signin" href="/login.html" hidden>Log in</a>
+</header>
+
+<main>
+    <section class="intro">
+        <span class="eyebrow">Appearance</span>
+        <h1>Skin uploads</h1>
+        <p class="lead">
+            Put a custom skin on your BakoSMP account. Uploads take effect the next
+            time you join &mdash; if you are already online, rejoin to see it.
+        </p>
+        <span class="assurance">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span><strong>Your password is sent to the server, never stored here.</strong> It is how the server knows the skin is yours to change.</span>
+        </span>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Upload a skin</h2>
+        </div>
+        <div class="panel lit">
+            <p class="panel-desc">
+                Skins need to be in the server's own format. Convert a normal skin PNG
+                with the <a href="https://skinsrestorer.net/generator" target="_blank" rel="noopener">SkinsRestorer generator</a>,
+                then upload the <code>.customskin</code> file it hands back.
+            </p>
+            <form id="uploadForm" class="stack">
+                <div class="field">
+                    <label for="skinFile">Skin file</label>
+                    <input type="file" id="skinFile" name="file" accept=".customskin,.skinfile,.skin" required>
+                </div>
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-primary" type="submit">Upload skin</button>
+                </div>
+                <p class="note" id="uploadNote" role="status"></p>
+            </form>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Uploaded skins</h2>
+            <span class="tally" id="skinsTally"></span>
+        </div>
+        <div class="panel">
+            <p class="panel-desc">
+                Look up everything a player has on file. No password needed &mdash; the
+                list is public, the skins themselves are not secret.
+            </p>
+            <form id="viewForm" class="actions">
+                <input type="text" id="viewUsername" placeholder="Username" aria-label="Username to look up" required>
+                <button class="btn btn-quiet" type="submit">View skins</button>
+            </form>
+            <div class="stack" id="skinsList"></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Delete a skin</h2>
+        </div>
+        <div class="panel sunk">
+            <div class="callout danger">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 9v4"></path>
+                    <path d="M12 17h.01"></path>
+                    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
+                </svg>
+                <span><b>This cannot be undone.</b> Use the lookup above to get the exact filename first.</span>
+            </div>
+            <form id="deleteForm" class="stack">
+                <div class="field">
+                    <label for="deleteUsername">Username</label>
+                    <input type="text" id="deleteUsername" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="deletePassword">Password</label>
+                    <input type="password" id="deletePassword" autocomplete="current-password" required>
+                </div>
+                <div class="field">
+                    <label for="deleteSkinName">Skin filename</label>
+                    <input type="text" id="deleteSkinName" placeholder="e.g. myskin.customskin" required>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-danger" type="submit">Delete skin</button>
+                </div>
+                <p class="note" id="deleteNote" role="status"></p>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer class="page">
+    <span>BakoSMP &middot; hosted by BakoPlayz</span>
+    <span>
+        <a href="https://discord.gg/DMx3m54waD" target="_blank" rel="noopener">Discord</a> &middot;
+        <a href="/status/">Server status</a> &middot;
+        <a href="/raindrippy/privacy-policy">Privacy</a>
+    </span>
+</footer>
+
+<div id="cookie-banner">
     <p id="txt">This website uses cookies to ensure you get the best experience.</p>
     <a href="/raindrippy/privacy-policy" target="_blank">Learn more</a>
     <button id="cookie-ok">OK</button>
-  </div>
-  <script src="/js/cookies.js"></script>
-  <div class="content">
-    <h1>Skin Uploads</h1>
-    <p style="margin-top: 2em;">Upload your skin to the BakoSMP server!</p>
-    <p>To get the proper skin file format, please click <a href="https://skinsrestorer.net/generator" style="text-decoration: underline; color: white;"><i>here</i></a>.</p>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <label for="skinFile">Select skin file:</label>
-      <input type="file" id="skinFile" name="file" accept=".customskin,.skinfile,.skin" required style="margin-top: 0.75em"><br>
-      <input type="text" id="username" name="username" placeholder="Enter your username" required style="margin-top: 0.75em"><br>
-      <input type="password" id="password" name="password" placeholder="Enter your password" required style="margin-top: 0.75em"><br>
-      <button type="submit" style="margin-top: 1em">Upload Skin</button>
-    </form>
-    <p id="result-upload" style="display:none; font-weight:bold;"></p>
-    <hr style="margin:2em 0"/>
+</div>
 
-    <h1>Uploaded skins</h1>
-    <p style="margin-top: 1em;">View all skins uploaded by a user!</p>
+<script src="/js/embers.js"></script>
+<script src="/js/session.js"></script>
+<script src="/js/cookies.js"></script>
+<script src="/js/genFP.js"></script>
+<script src="/js/toast.js"></script>
+<script>
+/* ---------------------------------------------------------------------------
+   Three forms, one shape: disable the button, say what is happening in the
+   .note beside it, put the outcome back in the same place. The note stays on
+   screen because a failure here usually needs re-reading (wrong password,
+   wrong filename); the toast is only the "that worked" confirmation.
+--------------------------------------------------------------------------- */
 
-    <div class="view-container">
-      <form id="viewSkinsForm">
-        <input type="text" id="viewUsername" name="viewUsername" placeholder="Enter username to view skins" required style="margin-top: 0.75em"/><br>
-        <button type="submit" style="margin-top: 1em">View Skins</button>
-      </form>
+function say(note, message, kind) {
+    note.textContent = message;
+    note.className = 'note' + (kind ? ' ' + kind : '');
+}
 
-      <!-- The popup result panel -->
-      <div id="result-view-overlay">
-        <button id="closePopup">×</button>
-        <h2>Uploaded Skins</h2>
-        <ul id="skinsList"></ul>
-      </div>
-    </div>
-    <hr style="margin:2em 0"/>
-    <h1>Skin deletion</h1>
-    <p style="margin-top: 1em;">Delete your uploaded skins! To get available skins for deletion, use the section above.</p>
-    <form id="deleteForm">
-        <input type="text" id="deleteUsername" name="deleteUsername" placeholder="Enter your username" required style="margin-top: 0.75em"/><br>
-        <input type="password" id="deletePassword" name="deletePassword" placeholder="Enter your password" required style="margin-top: 0.75em"/><br>
-        <input type="text" id="deleteSkinName" name="deleteSkinName" placeholder="Enter skin name to delete" required style="margin-top: 0.75em"/><br>
-        <button type="submit" style="margin-top: 1em; background-color: darkred;">Delete Skin</button>
-    </form>
-    <p id="result-delete" style="display:none; font-weight:bold;"></p>
-    <script>
-      // Handle deletion
-      document.getElementById('deleteForm').addEventListener('submit', async e => {
-  e.preventDefault();
-
-  const resultEl = document.getElementById('result-delete');
-  resultEl.style.display = 'none';
-
-  // Collect inputs
-  const username = document.getElementById('deleteUsername').value;
-  const password = document.getElementById('deletePassword').value;
-  const skinName = document.getElementById('deleteSkinName').value;
-
-  // Prepare JSON body
-  const payload = {
-    username: username,
-    password: password,
-    filename: skinName
-  };
-
-  try {
-    const res = await fetch('https://bakosmp.go.ro/api/delskin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'  // Important!
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.status === 200) {
-      resultEl.style.color = 'green';
-      resultEl.textContent = 'Deleted successfully';
-    } else {
-      // Optionally try to parse error message from response
-      let errorMsg = 'Deletion failed';
-      try {
-        const errData = await res.json();
-        if (errData.message) errorMsg = errData.message;
-      } catch {}
-
-      resultEl.style.color = 'red';
-      resultEl.textContent = errorMsg;
+async function submitting(button, label, work) {
+    const original = button.textContent;
+    button.disabled = true;
+    button.textContent = label;
+    try {
+        await work();
+    } finally {
+        button.disabled = false;
+        button.textContent = original;
     }
-  } catch (error) {
-    resultEl.style.color = 'red';
-    resultEl.textContent = 'Deletion failed';
-    console.error("Deletion error:", error);
-  } finally {
-    resultEl.style.display = 'block';
-  }
+}
+
+/* --- upload ------------------------------------------------------------- */
+
+document.getElementById('uploadForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const note = document.getElementById('uploadNote');
+    const button = form.querySelector('button[type="submit"]');
+
+    say(note, 'Uploading\u2026', 'busy');
+
+    submitting(button, 'Uploading\u2026', async function () {
+        try {
+            const response = await fetch('/api/uploadskinfile', {
+                method: 'POST',
+                body: new FormData(form)
+            });
+
+            if (response.status === 200) {
+                say(note, 'Uploaded. Rejoin the server to see it.', 'ok');
+                toast('Skin uploaded');
+                form.reset();
+            } else {
+                const data = await response.json().catch(function () { return {}; });
+                say(note, data.message || 'Upload failed. Check the file format and your password.', 'bad');
+            }
+        } catch (err) {
+            say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+        }
+    });
 });
 
-    </script>
-    <script>
-      // Handle upload
-      document.getElementById('uploadForm').addEventListener('submit', async e => {
-        e.preventDefault();
+/* --- lookup ------------------------------------------------------------- */
 
-        const resultEl = document.getElementById('result-upload');
-        resultEl.style.display = 'none';
+document.getElementById('viewForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-        const formData = new FormData(e.target);
+    const username = document.getElementById('viewUsername').value.trim();
+    const list = document.getElementById('skinsList');
+    const tally = document.getElementById('skinsTally');
+    const button = event.target.querySelector('button[type="submit"]');
 
+    list.innerHTML = '';
+    tally.textContent = '';
+    if (!username) { return; }
+
+    submitting(button, 'Looking\u2026', async function () {
+        let skins;
         try {
-          const res = await fetch('https://bakosmp.go.ro/api/uploadskinfile', {
-            method: 'POST',
-            body: formData
-          });
-
-          if (res.status === 200) {
-            resultEl.style.color = 'green';
-            resultEl.textContent = 'Uploaded successfully';
-          } else {
-            resultEl.style.color = 'red';
-            resultEl.textContent = 'Upload failed';
-          }
-        } catch (error) {
-          resultEl.style.color = 'red';
-          resultEl.textContent = 'Upload failed';
-        } finally {
-          resultEl.style.display = 'block';
-        }
-      });
-
-      // Handle skin view
-      document.getElementById('viewSkinsForm').addEventListener('submit', async e => {
-        e.preventDefault();
-
-        const username = document.getElementById('viewUsername').value;
-        const popup = document.getElementById('result-view-overlay');
-        const list = document.getElementById('skinsList');
-
-        // Clear list
-        list.innerHTML = '';
-        popup.style.display = 'none';
-
-        try {
-          const res = await fetch(`https://bakosmp.go.ro/api/userskins/${encodeURIComponent(username)}`);
-
-          if (res.status === 200) {
-            const data = await res.json();
-            const skins = data.files;
-            if (skins.length === 0) {
-              list.innerHTML = '<li>No skins uploaded</li>';
-            } else {
-              skins.forEach(skin => {
-                const li = document.createElement('li');
-                li.textContent = `• ${skin}`;
-                list.appendChild(li);
-              });
+            const response = await fetch('/api/userskins/' + encodeURIComponent(username));
+            if (response.status !== 200) {
+                list.innerHTML = '<div class="empty">No skins on file for that name.</div>';
+                return;
             }
-
-            popup.style.display = 'block';
-          } else {
-            list.innerHTML = '<li>No skins found or user does not exist</li>';
-            popup.style.display = 'block';
-          }
-        } catch (error) {
-          list.innerHTML = '<li>Error fetching skins</li>';
-          console.error("Caught exception:", error);
-          popup.style.display = 'block';
+            skins = (await response.json()).files || [];
+        } catch (err) {
+            list.innerHTML = '<div class="empty">Could not reach the server.</div>';
+            return;
         }
-      });
 
-      // Close popup
-      document.getElementById('closePopup').addEventListener('click', () => {
-        document.getElementById('result-view-overlay').style.display = 'none';
-      });
-    </script>
+        if (!skins.length) {
+            list.innerHTML = '<div class="empty">No skins on file for that name.</div>';
+            return;
+        }
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-    <script src="particles.js"></script>
-    <script src="/js/genFP.js"></script>
-  </div>
+        tally.textContent = skins.length + (skins.length === 1 ? ' skin' : ' skins');
+
+        skins.forEach(function (skin) {
+            // textContent, not innerHTML: filenames come from whatever people
+            // chose to upload and are not ours to trust as markup.
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const name = document.createElement('div');
+            name.className = 'row-name';
+            const strong = document.createElement('strong');
+            strong.textContent = skin;
+            const meta = document.createElement('span');
+            meta.className = 'meta';
+            meta.textContent = username;
+            name.appendChild(strong);
+            name.appendChild(meta);
+
+            const use = document.createElement('button');
+            use.type = 'button';
+            use.className = 'btn btn-quiet btn-sm';
+            use.textContent = 'Fill delete form';
+            use.addEventListener('click', function () {
+                document.getElementById('deleteUsername').value = username;
+                document.getElementById('deleteSkinName').value = skin;
+                document.getElementById('deleteForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+
+            row.appendChild(name);
+            row.appendChild(use);
+            list.appendChild(row);
+        });
+    });
+});
+
+/* --- delete ------------------------------------------------------------- */
+
+document.getElementById('deleteForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const note = document.getElementById('deleteNote');
+    const button = event.target.querySelector('button[type="submit"]');
+
+    const payload = {
+        username: document.getElementById('deleteUsername').value,
+        password: document.getElementById('deletePassword').value,
+        filename: document.getElementById('deleteSkinName').value
+    };
+
+    say(note, 'Deleting\u2026', 'busy');
+
+    submitting(button, 'Deleting\u2026', async function () {
+        try {
+            const response = await fetch('/api/delskin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.status === 200) {
+                say(note, 'Deleted.', 'ok');
+                toast('Skin deleted');
+                document.getElementById('deleteSkinName').value = '';
+                document.getElementById('deletePassword').value = '';
+            } else {
+                const data = await response.json().catch(function () { return {}; });
+                say(note, data.message || 'Deletion failed. Check the filename and your password.', 'bad');
+            }
+        } catch (err) {
+            say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+        }
+    });
+});
+</script>
 </body>
 </html>
