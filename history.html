@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         const response = await fetch('/api/account-status', { method: 'GET', credentials: 'include' });
         if (response.ok) {
             const me = await response.json();
-            if (me.is_og || me.is_admin) { editBtn.hidden = false; }
+            if (me.can_edit_wiki ?? (me.is_og || me.is_admin)) { editBtn.hidden = false; }
         }
     } catch (err) {
         console.debug('Could not check editing rights:', err);

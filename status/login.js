@@ -29,7 +29,8 @@ form.addEventListener('submit', async (e) => {
         const data = await res.json();
 
         if (res.ok) {
-            if (data.isAdmin) window.location.href = '/status/dashboard.html'; else { 
+            // canAccessPanel comes from the account's roles; isAdmin is the pre-roles field.
+            if (data.canAccessPanel ?? data.isAdmin) window.location.href = '/status/dashboard.html'; else { 
                 setStatus('You logged in as a regular user!', 'error');
                 setTimeout(() => setStatus(''), 3000);
             }
