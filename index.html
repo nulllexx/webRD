@@ -35,7 +35,7 @@
 
 <main>
     <section class="intro">
-        <span class="eyebrow">Season 8 &middot; Live now</span>
+        <span class="eyebrow"><span data-season>Season 8</span> &middot; Live now</span>
         <h1>A Minecraft SMP for everyone</h1>
         <p class="lead">
             Ever wanted to play multiplayer and failed to find a server that fits?
@@ -101,7 +101,7 @@
         </div>
         <div class="panel lit">
             <div class="panel-top">
-                <span class="state live"><i class="dot"></i>Season 8 running</span>
+                <span class="state live"><i class="dot"></i><span data-season>Season 8</span> running</span>
                 <span class="meta">world reset every 2&ndash;3 months</span>
             </div>
             <h3 class="panel-title">A new world before the old one gets boring</h3>
@@ -164,7 +164,7 @@
             </a>
             <a class="feature" href="/history.html">
                 <h3>Our history</h3>
-                <p>Eight seasons of it, written down by the people who were there.</p>
+                <p><span data-season-count>Eight seasons</span> of it, written down by the people who were there.</p>
                 <span class="go">Open &rarr;</span>
             </a>
             <a class="feature" href="/storage/">
@@ -218,5 +218,21 @@
 <script src="/js/session.js"></script>
 <script src="/js/cookies.js"></script>
 <script src="/js/genFP.js"></script>
+<script>
+    /* The current season, from the same season.json the admin panel reads.
+       The text in the page stays as it is if this fails. */
+    fetch('/api/season/current')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(({ season }) => {
+            if (!Number.isInteger(season) || season < 1) return;
+            const words = ['One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                           'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen',
+                           'Eighteen', 'Nineteen', 'Twenty'];
+            const count = (words[season - 1] || String(season)) + (season === 1 ? ' season' : ' seasons');
+            document.querySelectorAll('[data-season]').forEach(el => { el.textContent = `Season ${season}`; });
+            document.querySelectorAll('[data-season-count]').forEach(el => { el.textContent = count; });
+        })
+        .catch(() => {});
+</script>
 </body>
 </html>
