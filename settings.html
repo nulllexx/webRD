@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/cookie.css">
     <script src="/js/events.js" defer></script>
 </head>
-<body>
+<body data-no-email-prompt>
 <canvas id="embers" aria-hidden="true"></canvas>
 
 <header class="bar">
@@ -36,17 +36,76 @@
     <section class="intro">
         <span class="eyebrow">Account</span>
         <h1>Settings</h1>
-        <p class="lead">Your password, your data, and the button that ends it all.</p>
+        <p class="lead">Your email, your password, your data, and the button that ends it all.</p>
     </section>
 
     <div class="empty" id="gate">Checking your session&hellip;</div>
 
     <div class="stack-lg" id="panels" hidden>
+        <section class="section" id="email">
+            <div class="section-head">
+                <h2>Email address</h2>
+            </div>
+            <div class="panel">
+                <p class="panel-desc">
+                    Password reset links go here. It is only used for account emails.
+                </p>
+                <dl class="kv">
+                    <dt>Current</dt><dd id="emailCurrent">&mdash;</dd>
+                    <dt id="emailPendingLabel" hidden>Waiting</dt><dd id="emailPending" hidden></dd>
+                </dl>
+                <form id="emailForm" class="stack">
+                    <div class="field">
+                        <label for="emailAddress" id="emailAddressLabel">Email address</label>
+                        <input type="email" id="emailAddress" autocomplete="email" required>
+                    </div>
+                    <div class="field" id="emailPasswordField">
+                        <label for="emailPassword">Current password</label>
+                        <input type="password" id="emailPassword" autocomplete="current-password">
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" type="submit">Send confirmation link</button>
+                        <button class="btn btn-quiet" type="button" id="emailRemove" hidden>Remove address</button>
+                    </div>
+                    <p class="note" id="emailNote" role="status"></p>
+                </form>
+            </div>
+        </section>
+
+        <section class="section" id="google">
+            <div class="section-head">
+                <h2>Sign in with Google</h2>
+            </div>
+            <div class="panel">
+                <p class="panel-desc" id="googleDesc">Link your Google account to sign in with it instead of your password.</p>
+                <form id="googleForm" class="stack">
+                    <div class="field" id="googlePasswordField">
+                        <label for="googlePassword">Current password</label>
+                        <input type="password" id="googlePassword" autocomplete="current-password">
+                        <p class="hint">Needed to add or remove a way into your account.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" type="submit" id="googleLink">Link Google account</button>
+                        <button class="btn btn-quiet" type="button" id="googleUnlink" hidden>Unlink Google</button>
+                    </div>
+                    <p class="note" id="googleNote" role="status"></p>
+                </form>
+            </div>
+        </section>
+
         <section class="section" id="change-password">
             <div class="section-head">
                 <h2>Change password</h2>
             </div>
             <div class="panel">
+                <div class="callout" id="noPassword" hidden>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span><b>You sign in with Google.</b> To also sign in with a password, <a href="/forgot-password.html">get a link by email</a> and choose one.</span>
+                </div>
                 <form id="passwordForm" class="stack">
                     <div class="field">
                         <label for="currentPassword">Current password</label>
@@ -54,13 +113,31 @@
                     </div>
                     <div class="field">
                         <label for="newPassword">New password</label>
-                        <input type="password" id="newPassword" autocomplete="new-password" required>
+                        <input type="password" id="newPassword" autocomplete="new-password" minlength="8" required>
+                        <p class="hint">At least 8 characters. Forgotten the current one? <a href="/forgot-password.html">Reset it by email</a>.</p>
                     </div>
                     <div class="actions">
                         <button class="btn btn-primary" type="submit">Change password</button>
                     </div>
                     <p class="note" id="passwordNote" role="status"></p>
                 </form>
+            </div>
+        </section>
+
+        <section class="section" id="sessions">
+            <div class="section-head">
+                <h2>Sessions</h2>
+            </div>
+            <div class="panel">
+                <p class="panel-desc">
+                    Signing in keeps you signed in on that device for 7 days. Changing your
+                    password signs out every other device. If you think someone else is signed
+                    in as you, sign out everywhere and change your password.
+                </p>
+                <div class="actions">
+                    <button class="btn btn-danger" id="revokeBtn" type="button">Sign out everywhere</button>
+                </div>
+                <p class="note" id="sessionsNote" role="status"></p>
             </div>
         </section>
 
@@ -151,8 +228,130 @@ window.session.then(function (me) {
         window.location.href = '/login.html';
         return;
     }
-    document.getElementById('gate').hidden = true;
-    document.getElementById('panels').hidden = false;
+    loadAccount().then(function () {
+        document.getElementById('gate').hidden = true;
+        document.getElementById('panels').hidden = false;
+    });
+});
+
+/* --- email -------------------------------------------------------------- */
+
+let account = null;
+
+async function loadAccount() {
+    try {
+        const response = await fetch('/api/account/settings', { credentials: 'include' });
+        if (!response.ok) { return; }
+        account = await response.json();
+    } catch (err) {
+        return;
+    }
+
+    const current = document.getElementById('emailCurrent');
+    current.textContent = account.email
+        ? account.email + (account.emailVerified ? '' : ' (not confirmed)')
+        : 'None yet';
+
+    const pending = account.pendingEmail;
+    document.getElementById('emailPendingLabel').hidden = !pending;
+    const pendingEl = document.getElementById('emailPending');
+    pendingEl.hidden = !pending;
+    pendingEl.textContent = pending ? pending + ' — open the link we sent to confirm it' : '';
+
+    document.getElementById('emailAddressLabel').textContent =
+        account.emailVerified ? 'New email address' : 'Email address';
+    document.getElementById('emailRemove').hidden = !account.email;
+
+    // Accounts made through Google have no password to confirm with.
+    document.getElementById('emailPasswordField').hidden = !account.hasPassword;
+    document.getElementById('emailPassword').required = account.hasPassword;
+    document.getElementById('noPassword').hidden = account.hasPassword;
+    document.getElementById('passwordForm').hidden = !account.hasPassword;
+
+    // Google
+    document.getElementById('googleDesc').textContent = account.googleLinked
+        ? (account.hasPassword
+            ? 'Your Google account is linked: you can sign in with it or with your password.'
+            : 'You sign in with Google. To unlink it, set a password first, so you still have a way in.')
+        : 'Link your Google account to sign in with it instead of your password.';
+    document.getElementById('googleLink').hidden = account.googleLinked;
+    document.getElementById('googleUnlink').hidden = !account.googleLinked;
+    document.getElementById('googleUnlink').disabled = !account.hasPassword;
+    document.getElementById('googlePasswordField').hidden = !account.hasPassword;
+
+    if (!account.emailEnabled) {
+        const note = document.getElementById('emailNote');
+        say(note, 'Email is not set up on this server yet, so addresses cannot be confirmed.', 'warn');
+        document.querySelector('#emailForm button[type="submit"]').disabled = true;
+    }
+}
+
+document.getElementById('emailForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const note = document.getElementById('emailNote');
+    const button = event.target.querySelector('button[type="submit"]');
+
+    say(note, 'Sending\u2026', 'busy');
+    button.disabled = true;
+
+    try {
+        const response = await fetch('/api/account/email', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('emailAddress').value.trim(),
+                password: document.getElementById('emailPassword').value || null
+            })
+        });
+        const data = await response.json().catch(function () { return {}; });
+
+        if (response.ok) {
+            say(note, data.message || 'Check your inbox for a confirmation link.', 'ok');
+            event.target.reset();
+            loadAccount();
+        } else {
+            say(note, data.error || 'Could not send the link.', 'bad');
+        }
+    } catch (err) {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+    } finally {
+        button.disabled = false;
+    }
+});
+
+document.getElementById('emailRemove').addEventListener('click', async function () {
+    const note = document.getElementById('emailNote');
+    const password = document.getElementById('emailPassword').value;
+
+    if (account && account.hasPassword && !password) {
+        say(note, 'Enter your current password above to remove the address.', 'bad');
+        return;
+    }
+    if (!window.confirm('Remove your email address? You will not be able to reset your password by email.')) {
+        return;
+    }
+
+    say(note, 'Removing\u2026', 'busy');
+    try {
+        const response = await fetch('/api/account/email', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password || null })
+        });
+        const data = await response.json().catch(function () { return {}; });
+        if (response.ok) {
+            say(note, data.message || 'Email address removed.', 'ok');
+            document.getElementById('emailForm').reset();
+            loadAccount();
+        } else {
+            say(note, data.error || 'Could not remove the address.', 'bad');
+        }
+    } catch (err) {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+    }
 });
 
 /* --- password ----------------------------------------------------------- */
@@ -179,16 +378,109 @@ document.getElementById('passwordForm').addEventListener('submit', async functio
         const data = await response.json().catch(function () { return {}; });
 
         if (response.ok) {
-            say(note, data.message || 'Password changed.', 'ok');
+            say(note, data.message || 'Password changed. Every other device has been signed out.', 'ok');
             toast('Password changed');
             event.target.reset();
         } else {
-            say(note, data.message || 'Could not change the password.', 'bad');
+            say(note, data.error || 'Could not change the password.', 'bad');
         }
     } catch (err) {
         say(note, 'Could not reach the server. Try again in a moment.', 'bad');
     } finally {
         button.disabled = false;
+    }
+});
+
+/* --- google ------------------------------------------------------------- */
+
+/* Coming back from Google after linking: ?google=<outcome>. */
+(function () {
+    const outcomes = {
+        linked: ['Google account linked. You can now sign in with Google.', 'ok'],
+        taken: ['That Google account is already linked to a different account.', 'bad'],
+        already: ['This account already has a Google account linked.', 'warn'],
+        cancelled: ['Linking was cancelled.', 'warn'],
+        session: ['You were signed out before linking finished. Sign in and try again.', 'warn'],
+        error: ['Linking failed. Try again in a moment.', 'bad']
+    };
+    const outcome = outcomes[new URLSearchParams(window.location.search).get('google')];
+    if (!outcome) { return; }
+    say(document.getElementById('googleNote'), outcome[0], outcome[1]);
+    history.replaceState(null, '', window.location.pathname + window.location.hash);
+})();
+
+document.getElementById('googleForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const note = document.getElementById('googleNote');
+    const password = document.getElementById('googlePassword').value;
+
+    if (account && account.hasPassword && !password) {
+        say(note, 'Enter your current password to link Google.', 'bad');
+        return;
+    }
+    say(note, 'Taking you to Google\u2026', 'busy');
+    try {
+        const response = await fetch('/api/auth/oauth/google/link', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password || null, returnTo: 'bako' })
+        });
+        const data = await response.json().catch(function () { return {}; });
+        if (response.ok && data.url) {
+            window.location.href = data.url;
+        } else {
+            say(note, data.error || 'Could not start linking.', 'bad');
+        }
+    } catch (err) {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+    }
+});
+
+document.getElementById('googleUnlink').addEventListener('click', async function () {
+    const note = document.getElementById('googleNote');
+    const password = document.getElementById('googlePassword').value;
+    if (!password) {
+        say(note, 'Enter your current password to unlink Google.', 'bad');
+        return;
+    }
+    try {
+        const response = await fetch('/api/account/google', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password })
+        });
+        const data = await response.json().catch(function () { return {}; });
+        if (response.ok) {
+            say(note, data.message || 'Google account unlinked.', 'ok');
+            document.getElementById('googleForm').reset();
+            loadAccount();
+        } else {
+            say(note, data.error || 'Could not unlink Google.', 'bad');
+        }
+    } catch (err) {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
+    }
+});
+
+/* --- sessions ----------------------------------------------------------- */
+
+document.getElementById('revokeBtn').addEventListener('click', async function () {
+    const note = document.getElementById('sessionsNote');
+    if (!window.confirm('Sign out on every device, including this one?')) { return; }
+    say(note, 'Signing out everywhere\u2026', 'busy');
+    try {
+        const response = await fetch('/api/account/sessions/revoke', { method: 'POST', credentials: 'include' });
+        const data = await response.json().catch(function () { return {}; });
+        if (response.ok) {
+            say(note, 'Signed out everywhere.', 'ok');
+            setTimeout(function () { window.location.href = '/login.html'; }, 1400);
+        } else {
+            say(note, data.error || 'Could not sign out everywhere.', 'bad');
+        }
+    } catch (err) {
+        say(note, 'Could not reach the server. Try again in a moment.', 'bad');
     }
 });
 
@@ -272,7 +564,7 @@ confirmBtn.addEventListener('click', async function () {
             say(note, data.message || 'Account deleted. Signing you out\u2026', 'ok');
             setTimeout(function () { window.location.href = '/index.html'; }, 2600);
         } else {
-            say(note, data.message || 'Could not delete the account.', 'bad');
+            say(note, data.error || 'Could not delete the account.', 'bad');
         }
     } catch (err) {
         say(note, 'Could not reach the server. Try again in a moment.', 'bad');

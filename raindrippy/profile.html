@@ -47,36 +47,181 @@
         </header>
 
         <div id="profile-info" hidden>
-            <div class="card">
-                <h2 class="card-title">Your API key</h2>
-                <p class="rd-section-lede">Your key authenticates every call to the RainDrippy Public API. Keep it secret &mdash; anyone holding it can spend your hourly quota.</p>
+            <div id="email-banner" class="alert alert-warn" hidden>
+                <i class="fa-solid fa-envelope" aria-hidden="true"></i>
+                <span>Password resets now go out by email, and your account has no address yet.
+                <a href="#settings" id="email-banner-link">Add one in Settings</a> so you can always get back in.</span>
+            </div>
 
-                <div class="rd-hero-actions rd-actions-start">
-                    <button type="button" id="generate-api-key" class="btn btn-primary">
-                        <i class="fa-solid fa-key" aria-hidden="true"></i> Fetch API key
-                    </button>
-                    <button type="button" id="copy-api-key" class="btn btn-outline" hidden>
-                        <i class="fa-regular fa-copy" aria-hidden="true"></i> Copy
-                    </button>
-                    <button type="button" id="hide-key" class="btn btn-outline" hidden>
-                        <i class="fa-regular fa-eye-slash" aria-hidden="true"></i> Hide
-                    </button>
+            <nav class="rd-tabs" role="tablist" aria-label="Profile sections">
+                <button type="button" class="rd-tab" role="tab" id="tab-api" aria-controls="panel-api" aria-selected="true" data-tab="api">
+                    <i class="fa-solid fa-key" aria-hidden="true"></i> API key
+                </button>
+                <button type="button" class="rd-tab" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-tab="settings" tabindex="-1">
+                    <i class="fa-solid fa-gear" aria-hidden="true"></i> Settings
+                </button>
+            </nav>
+
+            <section id="panel-api" role="tabpanel" aria-labelledby="tab-api">
+                <div class="card">
+                    <h2 class="card-title">Your API key</h2>
+                    <p class="rd-section-lede">Your key authenticates every call to the RainDrippy Public API. Keep it secret &mdash; anyone holding it can spend your hourly quota.</p>
+
+                    <div class="rd-hero-actions rd-actions-start">
+                        <button type="button" id="generate-api-key" class="btn btn-primary">
+                            <i class="fa-solid fa-key" aria-hidden="true"></i> Fetch API key
+                        </button>
+                        <button type="button" id="copy-api-key" class="btn btn-outline" hidden>
+                            <i class="fa-regular fa-copy" aria-hidden="true"></i> Copy
+                        </button>
+                        <button type="button" id="hide-key" class="btn btn-outline" hidden>
+                            <i class="fa-regular fa-eye-slash" aria-hidden="true"></i> Hide
+                        </button>
+                    </div>
+
+                    <code id="key-output" class="rd-code rd-key-output"></code>
+                    <p id="copied" class="rd-muted" hidden>Copied to your clipboard.</p>
                 </div>
 
-                <code id="key-output" class="rd-code rd-key-output"></code>
-                <p id="copied" class="rd-muted" hidden>Copied to your clipboard.</p>
-            </div>
+                <div class="card">
+                    <h2 class="card-title">Usage</h2>
+                    <p class="rd-section-lede">Every key is limited to 100 requests per hour. Read the <a href="/raindrippy/docs/v1/index">API documentation</a> for the full endpoint list.</p>
 
-            <div class="card">
-                <h2 class="card-title">Usage</h2>
-                <p class="rd-section-lede">Every key is limited to 100 requests per hour. Read the <a href="/raindrippy/docs/v1/index">API documentation</a> for the full endpoint list.</p>
+                    <button type="button" id="fetch-usage" class="btn btn-outline">
+                        <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Get usage
+                    </button>
 
-                <button type="button" id="fetch-usage" class="btn btn-outline">
-                    <i class="fa-solid fa-chart-simple" aria-hidden="true"></i> Get usage
-                </button>
+                    <div id="usage-info" class="rd-mt"></div>
+                </div>
+            </section>
 
-                <div id="usage-info" class="rd-mt"></div>
-            </div>
+            <section id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+                <div class="card">
+                    <h2 class="card-title">Account</h2>
+                    <dl class="rd-kv">
+                        <dt>Username</dt><dd id="set-username">&mdash;</dd>
+                        <dt>Member since</dt><dd id="set-created">&mdash;</dd>
+                        <dt>Password</dt><dd id="set-has-password">&mdash;</dd>
+                        <dt>Google</dt><dd id="set-google">&mdash;</dd>
+                    </dl>
+                </div>
+
+                <div class="card" id="google-card">
+                    <h2 class="card-title">Sign in with Google</h2>
+                    <p class="rd-section-lede" id="google-lede">Link your Google account to sign in with it instead of your password.</p>
+                    <p id="google-link-status" class="alert rd-status" role="status" hidden></p>
+                    <form id="google-form" class="rd-settings-form">
+                        <div class="form-group" id="google-password-group">
+                            <label for="google-password">Current password</label>
+                            <input type="password" id="google-password" autocomplete="current-password">
+                            <p class="rd-hint">Needed to add or remove a way into your account.</p>
+                        </div>
+                        <div class="rd-hero-actions rd-actions-start">
+                            <button type="submit" id="google-link" class="btn btn-primary">
+                                <i class="fa-brands fa-google" aria-hidden="true"></i> Link Google account
+                            </button>
+                            <button type="button" id="google-unlink" class="btn btn-outline" hidden>Unlink Google</button>
+                        </div>
+                    </form>
+                    <p id="google-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+
+                <div class="card" id="email-card">
+                    <h2 class="card-title">Email address</h2>
+                    <p class="rd-section-lede">Password reset links are sent here. It is only used for account emails.</p>
+                    <dl class="rd-kv">
+                        <dt>Current</dt><dd id="set-email">&mdash;</dd>
+                        <dt id="set-pending-label" hidden>Waiting</dt><dd id="set-pending" hidden></dd>
+                    </dl>
+
+                    <form id="email-form" class="rd-settings-form">
+                        <div class="form-group">
+                            <label for="email-input" id="email-input-label">Email address</label>
+                            <input type="email" id="email-input" autocomplete="email" required>
+                        </div>
+                        <div class="form-group" id="email-password-group">
+                            <label for="email-password">Current password</label>
+                            <input type="password" id="email-password" autocomplete="current-password">
+                            <p class="rd-hint">Needed to change where reset links go.</p>
+                        </div>
+                        <div class="rd-hero-actions rd-actions-start">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send confirmation link
+                            </button>
+                            <button type="button" id="email-remove" class="btn btn-outline" hidden>Remove address</button>
+                        </div>
+                    </form>
+                    <p id="email-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Password</h2>
+
+                    <div id="password-none" hidden>
+                        <p class="rd-section-lede">You sign in with Google, so this account has no password. To also be able to sign in with your username and a password, get a link by email and choose one.</p>
+                        <button type="button" id="password-set" class="btn btn-outline">
+                            <i class="fa-solid fa-envelope" aria-hidden="true"></i> Email me a link to set one
+                        </button>
+                    </div>
+
+                    <form id="password-form" class="rd-settings-form" hidden>
+                        <div class="form-group">
+                            <label for="pw-current">Current password</label>
+                            <input type="password" id="pw-current" autocomplete="current-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pw-new">New password</label>
+                            <input type="password" id="pw-new" autocomplete="new-password" minlength="8" required>
+                            <p class="rd-hint">At least 8 characters.</p>
+                        </div>
+                        <div class="form-group">
+                            <label for="pw-confirm">Confirm new password</label>
+                            <input type="password" id="pw-confirm" autocomplete="new-password" minlength="8" required>
+                        </div>
+                        <div class="rd-hero-actions rd-actions-start">
+                            <button type="submit" class="btn btn-primary">Change password</button>
+                        </div>
+                        <p class="rd-hint">Forgotten it? <a href="/forgot-password.html">Reset it by email</a>.</p>
+                    </form>
+                    <p id="password-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Your data</h2>
+                    <p class="rd-section-lede">Everything we hold about your account, as JSON.</p>
+                    <button type="button" id="data-download" class="btn btn-outline">
+                        <i class="fa-solid fa-download" aria-hidden="true"></i> Download my data
+                    </button>
+                    <p id="data-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title">Sessions</h2>
+                    <p class="rd-section-lede">Signing in keeps you signed in on that device for 7 days. Changing your password signs out every other device. If you think someone else is signed in as you, sign out everywhere and change your password.</p>
+                    <div class="rd-hero-actions rd-actions-start">
+                        <button type="button" id="sign-out" class="btn btn-outline">
+                            <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Sign out
+                        </button>
+                        <button type="button" id="sign-out-everywhere" class="btn btn-danger">
+                            <i class="fa-solid fa-power-off" aria-hidden="true"></i> Sign out everywhere
+                        </button>
+                    </div>
+                    <p id="sessions-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+
+                <div class="card rd-danger-zone">
+                    <h2 class="card-title">Delete account</h2>
+                    <p class="rd-section-lede">This is permanent. Your account, API key, uploaded skins and poll answers all go, and there is no recovery. Download your data first if you want to keep any of it.</p>
+                    <form id="delete-form" class="rd-settings-form">
+                        <div class="form-group">
+                            <label for="delete-confirm">Type <b>DELETE</b> to confirm</label>
+                            <input type="text" id="delete-confirm" autocomplete="off" placeholder="DELETE">
+                        </div>
+                        <button type="submit" id="delete-button" class="btn btn-danger" disabled>Delete my account</button>
+                    </form>
+                    <p id="delete-status" class="alert rd-status" role="status" hidden></p>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -100,7 +245,7 @@
                     <h4>Platform</h4>
                     <ul>
                         <li><a href="/raindrippy/docs/v1/index">API docs</a></li>
-                        <li><a href="/raindrippy/profile">Profile &amp; API key</a></li>
+                        <li><a href="/raindrippy/profile">Profile &amp; settings</a></li>
                         <li><a href="/status/index">Service status</a></li>
                     </ul>
                 </div>

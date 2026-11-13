@@ -1048,6 +1048,48 @@ html[data-theme="dark"] :where(.rd-page) .alert-info { color: var(--accent); }
 
 :where(.rd-page) .rd-key-output:empty { display: none; }
 
+/* -------------------------------------------------------- profile tabs --- */
+
+:where(.rd-page) .rd-tabs {
+    display: flex;
+    gap: 4px;
+    margin: 0 0 24px;
+    border-bottom: 1px solid var(--line);
+    /* Scrolls sideways on a narrow screen. overflow-y has to be stated: left
+       alone it becomes auto too, and the tabs' 1px overlap onto the border
+       below then draws a vertical scrollbar. */
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+/* Plain text tabs, so the global button chrome is undone here. */
+:where(.rd-page) .rd-tabs .rd-tab {
+    padding: 10px 16px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+:where(.rd-page) .rd-tabs .rd-tab:hover { color: var(--text); background: transparent; transform: none; }
+:where(.rd-page) .rd-tabs .rd-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+:where(.rd-page) .rd-tabs .rd-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* --------------------------------------------------------- settings tab --- */
+
+:where(.rd-page) .rd-settings-form { max-width: 460px; }
+:where(.rd-page) .rd-settings-form .rd-hero-actions { margin-bottom: 0; }
+:where(.rd-page) .rd-hint { margin: 6px 0 0; font-size: 0.8rem; color: var(--text-faint); }
+:where(.rd-page) .rd-status { margin: 16px 0 0; }
+/* The one status line that sits above its form rather than below it. */
+:where(.rd-page) #google-link-status { margin: 0 0 18px; }
+:where(.rd-page) .rd-kv dd .badge { margin-left: 8px; font-family: var(--rd-font); }
+:where(.rd-page) .card.rd-danger-zone { border-color: var(--danger); }
+:where(.rd-page) .card.rd-danger-zone .card-title { color: var(--danger); }
+
 /* --------------------------------------------------------------- mobile ---- */
 
 @media (max-width: 720px) {

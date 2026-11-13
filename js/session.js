@@ -58,3 +58,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+/* Signed-in accounts without an email address are asked for one (see
+   /js/email-prompt.js). Loaded only when someone is signed in, so anonymous
+   visitors never fetch it. */
+document.addEventListener('DOMContentLoaded', function () {
+    if (document.body.hasAttribute('data-no-email-prompt')) { return; }
+    window.session.then(function (me) {
+        if (!me.loggedIn) { return; }
+        var script = document.createElement('script');
+        script.src = '/js/email-prompt.js';
+        document.body.appendChild(script);
+    });
+});
